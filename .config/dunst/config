@@ -1,0 +1,88 @@
+[global]
+#   %a  appname
+#   %s  summary
+#   %b  body
+#   %i  iconname (including its path)
+#   %I  iconname (without its path)
+#   %p  progress value if set ([  0%] to [100%]) or nothing
+format = "<b>%s</b> %p\n%b\n<span font='9.5'>%a</span>"
+font = M+ p2 12
+
+allow_markup = yes
+sort = yes
+indicate_hidden = yes
+alignment = left
+word_wrap = yes
+ignore_newline = no
+transparency = 0
+shrink = no
+geometry = "250x10-30-30"
+bounce_freq = 0
+# Don't auto close popups when idle
+idle_threshold = 120			
+# Show popup age after # seconds
+show_age_threshold = 60			
+# follow must be none
+monitor = 0						
+# [mouse|keyboard|none]
+follow = mouse					
+sticky_history = yes
+history_length = 20
+# Display indicators for URLs (U) and actions (A).
+show_indicators = yes
+line_height = 3
+separator_height = 2
+padding = 8
+horizontal_padding = 8
+# [auto|frame|#color]
+separator_color = "#555555"
+startup_notification = false
+dmenu = /usr/bin/rofi -p Rofi:
+browser = /usr/bin/firefox -new-tab
+# [left|right|off]
+icon_position = left
+# icon_folders = /usr/share/icons/Flattr/status/scalable/:/usr/share/icons/Flattr/devices/scalable/
+
+[frame]
+width = 1
+color = "#0088CC"
+
+# [shortcuts]
+# close = ctrl+space
+# close_all = ctrl+shift+space
+# history = ctrl+grave
+# context = ctrl+shift+period
+
+[urgency_low]
+background = "#2f343f"
+foreground = "#268bd2"
+timeout = 5
+
+[urgency_normal]
+background = "#2f343f"
+foreground = "#fefefa"
+timeout = 5
+
+[urgency_critical]
+background = "#2f343f"
+foreground = "#DC322F"
+timeout = 0
+
+
+# Every section that isn't one of the above is interpreted as a rules to
+# override settings for certain messages.
+# Messages can be matched by "appname", "summary", "body", "icon", "category",
+# "msg_urgency" and you can override the "timeout", "urgency", "foreground",
+# "background", "new_icon" and "format".
+# Shell-like globbing will get expanded.
+#
+# SCRIPTING
+# You can specify a script that gets run when the rule matches by
+# setting the "script" option.
+# The script will be called as follows:
+#   script appname summary body icon urgency
+# where urgency can be "LOW", "NORMAL" or "CRITICAL".
+
+[twitch_now]
+summary="Twitch Now"
+background="#6845A7"

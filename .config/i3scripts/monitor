@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+BLOCK_BUTTON=${1:-$BLOCK_BUTTON}
+if [[ $BLOCK_BUTTON -eq 1 ]]; then
+	outputs=$(xrandr | grep -Po "^.+ connected" | grep -Po ".+ ")
+	output=$outputs
+	
+	if [[ $(echo $outputs | awk "{ print NF }") -ne 1 ]]; then
+		output=$(echo -e "$outputs" | rofi -dmenu -i -p "Select output:")
+	fi
+	
+	[[ -z $output ]] && exit 0
+	
+	notify-send "Using monitor: $output"
+	xrandr --output $output --auto --primary
+	
+	for out in $outputs
+	do
+		[ $out != $output ] && xrandr --output $out --off
+	done
+fi

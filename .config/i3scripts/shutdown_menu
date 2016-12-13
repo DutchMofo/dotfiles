@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+# menu defined as an associative array
+typeset -A menu
+menu=" Lock\n Sleep\n Logout\n Shutdown\n Reboot\n  Cancel"
+
+# case insensive, label menu:
+launcher="rofi -dmenu -i -p Menu: -hide-scrollbar -width 200"
+selection="$(echo -e "$menu" | ${launcher})"
+
+function confirm {
+	confirmed=$(echo -e "Yes\nNo" | rofi -dmenu -i -p "$3? " -hide-scrollbar -width 150)
+	if [ "${confirmed}" == "Yes" ]; then
+		$1
+	fi
+}
+
+if [[ $? -eq 0 && ! -z ${selection} ]]; then
+	case ${selection} in
+	" Lock")	exec ~/.config/i3scripts/lock ;;
+	" Sleep")	exec ~/.config/i3scripts/lock suspend ;;
+	" Logout")	confirm "i3-msg exit" $selection ;;
+	" Shutdown")	confirm "systemctl poweroff" $selection ;;
+	" Reboot")	confirm "systemctl reboot" $selection ;;
+	esac
+fi

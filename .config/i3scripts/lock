@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+icon="$HOME/.config/i3scripts/pad.png"
+tmpbg='/tmp/screen.png'
+bg="$HOME/Pictures/umbrella.png"
+
+# scrot "$tmpbg"
+# convert "$tmpbg" -scale 50% -blur 0x20 -scale 200% "$tmpbg"
+
+resolution=$(xrandr | grep -Po "\d+x\d+.+\*" | awk '{print $1}')
+
+if [ ! -f $tmpbg ] || [ ${resolution} != $(identify -format "%wx%h" $tmpbg) ]; then
+	convert $bg -resize "$resolution^" -gravity center -crop $resolution+0+0 +repage $tmpbg
+	convert $tmpbg $icon -gravity center -composite -matte $tmpbg 
+fi
+
+killall -SIGUSR1 dunst # pause notifications
+if [[ $1 = 'suspend' ]]; then
+	i3lock -e -i $tmpbg # Ignore empty
+	systemctl suspend
+else
+	i3lock -e -n -i $tmpbg # Ignore empty, no deamon
+fi
+killall -SIGUSR2 dunst # Resume notifications

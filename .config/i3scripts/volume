@@ -1,0 +1,32 @@
+#!/bin/bash
+
+BLOCK_BUTTON=${1:-$BLOCK_BUTTON}
+
+if [[ $BLOCK_BUTTON -ne 0 ]]; then
+	INDEX=$(pacmd list-sources | grep -Po '\* index: \K[0-9]+')
+	case $BLOCK_BUTTON in
+		3) pactl set-sink-mute $INDEX toggle ;; # Right click
+		4) pactl set-sink-volume $INDEX +5% ;; # Scroll up
+		5) pactl set-sink-volume $INDEX -5% ;; # Scroll down
+	esac
+fi
+
+if [[ $1 -ne 0 ]]; then
+	pkill -RTMIN+10 i3blocks
+	exit 0
+fi
+
+for name in INDEX NAME VOL MUTED; do
+	read $name
+done < <(pacmd list-sinks | grep "index:\|name:\|volume: front\|muted:" | grep -A3 '*')
+INDEX=$(echo "$INDEX" | grep -o '[0-9]\+')
+VOL="$(echo "$VOL" | grep -o "[0-9]*%" | head -1 )"
+NAME=$(echo "$NAME" | sed 's/.*\.\(.*\)>/\1/')
+
+icon=""
+if [[ $MUTED == "muted: yes" || $VOL == "0%" ]]; then
+	icon=""
+	VOL="0%"
+fi
+
+echo "<span color='#9b59b6'>$icon</span> $VOL"
