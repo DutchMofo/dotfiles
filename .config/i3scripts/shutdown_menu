@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# menu defined as an associative array
-typeset -A menu
 menu=" Lock\n Sleep\n Logout\n Shutdown\n Reboot\n  Cancel"
 
 # case insensive, label menu:
