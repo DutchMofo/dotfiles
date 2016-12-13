@@ -1,9 +1,15 @@
 # dotfiles
+My arch linux config files.
 
-My arch linux config files:
-Requires:
-* i3-gaps
-* i3blocks
+## Requires:
+* [i3-gaps](https://aur.archlinux.org/packages/i3-gaps/)
+* [i3blocks](https://aur.archlinux.org/packages/i3blocks/)
 * compton
 * rofi
-* dunst, 
+* dunst
+* i3lock
+* ImageMagick
+* [FontAwesome](https://aur.archlinux.org/packages/ttf-font-awesome/)
+* [M+](https://aur.archlinux.org/packages/ttf-mplus/)
+
+(non links can be installed with pacman)
