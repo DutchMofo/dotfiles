@@ -16,7 +16,7 @@ function confirm {
 if [[ $? -eq 0 && ! -z ${selection} ]]; then
 	case ${selection} in
 	" Lock")	exec ~/.config/i3scripts/lock ;;
-	" Sleep")	exec ~/.config/i3scripts/lock suspend ;;
+	" Sleep")	exec ~/.config/i3scripts/lock suspend; exec ~/.config/i3scripts/monitor ;;
 	" Logout")	confirm "i3-msg exit" $selection ;;
 	" Shutdown")	confirm "systemctl poweroff" $selection ;;
 	" Reboot")	confirm "systemctl reboot" $selection ;;

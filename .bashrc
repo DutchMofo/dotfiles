@@ -6,7 +6,9 @@
 [[ $- != *i* ]] && return
 
 alias ls='ls --group-directories-first --time-style=+"%d.%m.%Y %H:%M" --color=auto -F'
-PS1='\n\[\033[0;34m\][\[\033[0m\]\u\[\033[0;34m\]]\[\033[0m\] \w \[\033[0;34m\]\$\[\033[0m\] '
+#PS1='\n\[\033[0;34m\][\[\033[0m\]\u\[\033[0;34m\]]\[\033[0m\] \w \[\033[0;34m\]\$\[\033[0m\] '
+source ~/.bash_git
+PS1='\n\[\e[1;37m\]|-- \[\e[1;32m\]\u\[\e[0;39m\]@\[\e[1;36m\]\h\[\e[0;39m\]:\[\e[1;33m\]\w\[\e[0;39m\]\[\e[1;35m\]$(__git_ps1 " (%s)")\[\e[0;39m\] \[\e[1;37m\]--|\[\e[0;39m\]\nλ '
 
 function twitch {
 	mpv https://twitch.tv/$1

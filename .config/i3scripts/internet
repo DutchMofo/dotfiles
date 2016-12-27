@@ -1,0 +1,15 @@
+#!/usr/bin/perl
+
+`ip route` =~ /dev (\w+) .+ (\d+\.\d+\.\d+\.\d+)/;
+my $dev = $1;
+my $ip = $2;
+my $signal;
+
+
+if( -d "/sys/class/net/$dev/wireless") {
+	my $reg_dev = quotemeta $dev;
+	`cat /proc/net/wireless` =~ /$reg_dev: \d+ \s*(\d+)/;
+	$signal = ' '.int($1 * 100 / 70 + 0.5).'%';
+}
+
+print "$ip$signal";

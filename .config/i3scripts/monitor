@@ -1,21 +1,33 @@
-#!/usr/bin/env bash
+#!/usr/bin/perl
 
-BLOCK_BUTTON=${1:-$BLOCK_BUTTON}
-if [[ $BLOCK_BUTTON -eq 1 ]]; then
-	outputs=$(xrandr | grep -Po "^.+ connected" | grep -Po ".+ ")
-	output=$outputs
+my $button = defined $ARGV[0] ?
+	$ARGV[0] :
+	(defined $ENV{'BLOCK_BUTTON'} ? $ENV{'BLOCK_BUTTON'} : 0);
+
+my $output;
+my $args;
+
+if($button == 1) {
+	my @outputs = (`xrandr` =~ /(\w+) connected/g);
+	if(scalar @outputs == 1) {
+		$output = @outputs[0];
+	} else {
+		$args = join "\n", @outputs;
+		$output = `echo "$args" | rofi -dmenu`;
+		$output =~ s/\s+$//;
+	}
 	
-	if [[ $(echo $outputs | awk "{ print NF }") -ne 1 ]]; then
-		output=$(echo -e "$outputs" | rofi -dmenu -i -p "Select output:")
-	fi
-	
-	[[ -z $output ]] && exit 0
-	
-	notify-send "Using monitor: $output"
-	xrandr --output $output --auto --primary
-	
-	for out in $outputs
-	do
-		[ $out != $output ] && xrandr --output $out --off
-	done
-fi
+	if($output ne '') {
+		$args = "--output $output --auto --primary";
+		if($output =~ m/HDMI/) {
+			$args .= ' --set "Broadcast RGB" "Full"';
+		}
+		`notify-send "Using monitor: $output"`;
+		`xrandr $args`;
+		foreach(@outputs) {
+			if($_ ne $output) {
+				`xrandr --output $_ --off`;
+			}
+		}
+	}
+}

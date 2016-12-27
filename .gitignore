@@ -12,6 +12,8 @@
 /.config/termite/*
 !/.config/rofi/
 /.config/rofi/*
+!/.config/redshift/
+/.config/redshift/*
 !/.config/i3scripts/
 
 # Add files
@@ -25,3 +27,4 @@
 !/.config/compton/config
 !/.config/termite/config
 !/.config/rofi/config
+!/.config/redshift/config
