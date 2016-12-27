@@ -1,0 +1,76 @@
+# http://vivien.github.io/i3blocks
+
+# List of valid properties:
+# align
+# color
+# command
+# full_text
+# instance
+# interval
+# label
+# min_width
+# name
+# separator
+# separator_block_width
+# short_text
+# signal
+# urgent
+
+#         
+#    
+#   
+
+# Global properties
+command=/usr/lib/i3blocks/$BLOCK_NAME
+separator_block_width=15
+markup=pango
+color=#CBD8E1
+
+[monitor]
+full_text=
+command=~/.config/i3scripts/monitor
+
+[memory]
+label=
+interval=30
+
+[disk]
+label=
+interval=30
+
+[internet]
+command=/usr/bin/perl ~/.config/i3scripts/internet
+label=
+interval=10
+
+# [bandwidth]
+# instance=wlp2s0
+# interval=5
+
+# [cpu_usage]
+# label=CPU
+# interval=10
+# min_width=CPU: 100.00%
+# separator=false
+
+# [load_average]
+# interval=10
+
+[time]
+command=date '+ %d-%m-%Y  %H:%M:%S'
+interval=1
+
+[volume]
+command=/usr/bin/perl ~/.config/i3scripts/volume
+interval=once
+signal=10
+min_width=  100%
+
+[battery]
+command=~/.config/i3scripts/battery
+interval=30
+
+[shutdown_menu]
+full_text= 
+command=~/.config/i3scripts/shutdown_menu
+color=#c0392b

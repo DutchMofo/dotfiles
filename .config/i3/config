@@ -1,0 +1,168 @@
+# i3 config file (v4)
+# Please see http://i3wm.org/docs/userguide.html for a complete reference!
+# List all available keys: xmodmap -pke
+
+exec_always --no-startup-id setxkbmap -option numpad:microsoft
+exec --no-startup-id redshift -c ~/.config/redshift/config
+exec --no-startup-id compton --config ~/.config/compton/config
+exec --no-startup-id dunst -config ~/.config/dunst/config
+exec --no-startup-id exec nm-applet
+exec --no-startup-id exec ~/.config/i3scripts/wallpaper
+
+set $mod Mod4
+font pango:M+ p2
+
+gaps inner 4
+gaps outer 2
+smart_borders on
+smart_gaps on
+# hide_edge_borders both
+
+# for_window [class=".*"] normal
+for_window [class=".*"] title_format " <span size='small'>%title</span>"
+for_window [class=".*"] border pixel 3
+for_window [class="feh|Pavucontrol|SoundWireServer"] floating enable
+
+
+bindsym $mod+Shift+minus move scratchpad
+bindsym $mod+minus scratchpad show
+
+# Use Mouse+$mod to drag floating windows to their wanted position
+floating_modifier $mod
+focus_follows_mouse no
+
+bindsym $mod+Return				exec --no-startup-id termite
+bindsym $mod+n					exec --no-startup-id thunar
+bindsym $mod+d					exec --no-startup-id rofi -show run
+
+bindsym $mod+p					exec --no-startup-id ~/.config/i3scripts/monitor 1
+bindsym $mod+F1					exec --no-startup-id ~/.config/i3scripts/lock
+bindsym $mod+Shift+q			kill
+bindsym $mod+Shift+p			exec --no-startup-id ~/.config/i3scripts/password
+# bindsym XF86Calculator			...
+
+# Volume controls
+bindsym XF86AudioMute			exec --no-startup-id ~/.config/i3scripts/volume 3
+bindsym XF86AudioRaiseVolume	exec --no-startup-id ~/.config/i3scripts/volume 4
+bindsym XF86AudioLowerVolume	exec --no-startup-id ~/.config/i3scripts/volume 5
+
+# MPD Controls
+bindsym Pause					exec --no-startup-id mpc toggle
+bindsym KP_Add					exec --no-startup-id mpc volume +5
+bindsym KP_Subtract				exec --no-startup-id mpc volume -5
+bindsym control+KP_Add			exec --no-startup-id mpc next
+bindsym control+KP_Subtract		exec --no-startup-id mpc prev
+
+# change focus
+bindsym $mod+Left				focus left
+bindsym $mod+Down				focus down
+bindsym $mod+Up					focus up
+bindsym $mod+Right				focus right
+bindsym $mod+h					focus left
+bindsym $mod+j					focus down
+bindsym $mod+k					focus up
+bindsym $mod+l					focus right
+
+# move focused window
+bindsym $mod+Shift+Left			move left
+bindsym $mod+Shift+Down			move down
+bindsym $mod+Shift+Up			move up
+bindsym $mod+Shift+Right		move right
+bindsym $mod+Shift+h			move left
+bindsym $mod+Shift+j			move down
+bindsym $mod+Shift+k			move up
+bindsym $mod+Shift+l			move right
+
+set $split_mode "Split mode [H]orizontal, [V]ertical"
+bindsym $mod+s					mode $split_mode
+
+mode $split_mode {
+	bindsym h					split h;mode "default"
+	bindsym v					split v;mode "default"
+	bindsym Return				mode "default"
+	bindsym Escape				mode "default"
+}
+
+bindsym $mod+f					fullscreen toggle
+# bindsym $mod+a					focus parent
+# bindsym $mod+s					focus child
+# bindsym $mod+s					layout stacking
+bindsym $mod+w					layout tabbed
+bindsym $mod+e					layout toggle split
+
+bindsym $mod+Shift+space		floating toggle
+bindsym $mod+space				focus mode_toggle
+
+# switch to workspace
+bindsym $mod+1					workspace 1
+bindsym $mod+2					workspace 2
+bindsym $mod+3					workspace 3
+bindsym $mod+4					workspace 4
+bindsym $mod+5					workspace 5
+bindsym $mod+6					workspace 6
+bindsym $mod+7					workspace 7
+bindsym $mod+8					workspace 8
+bindsym $mod+9					workspace 9
+bindsym $mod+0					workspace 10
+
+# move focused container to workspace
+bindsym $mod+Shift+1			move container to workspace 1
+bindsym $mod+Shift+2			move container to workspace 2
+bindsym $mod+Shift+3			move container to workspace 3
+bindsym $mod+Shift+4			move container to workspace 4
+bindsym $mod+Shift+5			move container to workspace 5
+bindsym $mod+Shift+6			move container to workspace 6
+bindsym $mod+Shift+7			move container to workspace 7
+bindsym $mod+Shift+8			move container to workspace 8
+bindsym $mod+Shift+9			move container to workspace 9
+bindsym $mod+Shift+0			move container to workspace 10
+
+bindsym $mod+Shift+r			restart # Restart i3
+bindsym $mod+Shift+e			exec ~/.config/i3scripts/shutdown_menu  
+
+mode "resize" {
+	bindsym h					resize shrink width 5 px or 5 ppt
+	bindsym j					resize grow height 5 px or 5 ppt
+	bindsym k					resize shrink height 5 px or 5 ppt
+	bindsym l					resize grow width 5 px or 5 ppt
+	
+	bindsym Left				resize shrink width 10 px or 10 ppt
+	bindsym Down				resize grow height 10 px or 10 ppt
+	bindsym Up					resize shrink height 10 px or 10 ppt
+	bindsym Right				resize grow width 10 px or 10 ppt
+	
+	bindsym Return				mode "default"
+	bindsym Escape				mode "default"
+}
+
+bindsym $mod+r					mode "resize"
+
+# Active blue:	007ACC
+# Text normal:	cbd8e1
+# Text urgent:	dc322f
+# Text nofocus:	6F8393
+# Background:	2F343F
+
+#                       title_lines	border		text		indicator
+client.focused			#007ACC		#007ACC		#cbd8e1		#007ACC
+client.unfocused		#0E213D		#0E213D		#cbd8e1		#007ACC
+client.focused_inactive	#0E213D		#0E213D		#cbd8e1		#007ACC
+client.urgent			#0E213D		#0E213D		#cbd8e1		#007ACC
+			
+bar {
+	status_command i3blocks -c ~/.config/i3/i3blocks
+	# separator_symbol " "
+	position top
+	height 28
+	
+	colors {
+		background #0E213D
+		# statusline #ffffff
+		
+		# Workspace numbers
+		#					border		background	text
+		focused_workspace  	#0E213D		#0E213D		#cbd8e1
+		inactive_workspace 	#0E213D		#0E213D		#6F8393
+		urgent_workspace 	#dc322f		#dc322f		#ffffff
+	}
+}
