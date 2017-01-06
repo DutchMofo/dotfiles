@@ -1,5 +1,6 @@
 [options]
-font = Fantasque Sans Mono 13
+font=Overpass Mono 13
+
 browser = firefox
 clickable_url = false
 dynamic_title = true

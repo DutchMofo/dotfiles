@@ -25,7 +25,7 @@ show_age_threshold = 60
 # follow must be none
 monitor = 0						
 # [mouse|keyboard|none]
-follow = mouse					
+follow = keyboard					
 sticky_history = yes
 history_length = 20
 # Display indicators for URLs (U) and actions (A).
@@ -39,9 +39,10 @@ separator_color = "#555555"
 startup_notification = false
 dmenu = /usr/bin/rofi -p Rofi:
 browser = /usr/bin/firefox -new-tab
+
 # [left|right|off]
 icon_position = left
-# icon_folders = /usr/share/icons/Flattr/status/scalable/:/usr/share/icons/Flattr/devices/scalable/
+# icon_folders = /usr/share/icons/
 
 [frame]
 width = 1
@@ -84,5 +85,7 @@ timeout = 0
 # where urgency can be "LOW", "NORMAL" or "CRITICAL".
 
 [twitch_now]
+# script=/home/piet/.config/i3scripts/twitch-wrapper
+# icon=/home/piet/Pictures/icons/Twitch_icon.png
 summary="Twitch Now"
 background="#6845A7"

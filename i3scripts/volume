@@ -27,13 +27,12 @@ my $muted = $1;
 
 if(defined $ARGV[0]) {
 	`pkill -RTMIN+10 i3blocks`;
-	# exit(0);
 }
 
 my $text;
 if($muted eq 'yes') { $text = ''; }
 elsif($volume < 35) { $text = ''; }
 else				{ $text = ''; }
-$text .= (' ' x (length $volume - 4))."$volume%\n";
+$text .= (' ' x (4 - length $volume))."$volume%\n";
 
 print $text.$text;

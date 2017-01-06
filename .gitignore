@@ -1,33 +1,35 @@
 # Ignore all by default
+
 /*
+!/dunst/
+/dunst/*
+!compton/
+/compton/*
+!/termite/
+/termite/*
+!/rofi/
+/rofi/*
+!redshift/
+/redshift/*
+!/i3/
+/i3/*
+!/weechat
+/weechat/*
 
-# Add folders
-!/.config/
-/.config/*
-!/.config/dunst/
-/.config/dunst/*
-!/.config/compton/
-/.config/compton/*
-!/.config/termite/
-/.config/termite/*
-!/.config/rofi/
-/.config/rofi/*
-!/.config/redshift/
-/.config/redshift/*
-!/.config/i3/
-/.config/i3/*
-
-!/.config/i3scripts/
+# Add all i3 scripts
+!/i3scripts/
 
 # Add files
 !/.gitignore
 !/linux_log
-!/.bashrc
+!/zshrc
 
-!/.config/i3/config
-!/.config/i3/i3blocks
-!/.config/dunst/config
-!/.config/compton/config
-!/.config/termite/config
-!/.config/rofi/config
-!/.config/redshift/config
+!/i3/config
+!/i3/i3blocks
+!/dunst/config
+!/compton/config
+!/termite/config
+!/rofi/config
+!/redshift/config
+!/weechat/weechat.conf
+
