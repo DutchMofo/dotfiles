@@ -23,6 +23,7 @@
 !/.gitignore
 !/linux_log
 !/zshrc
+!/vimrc
 
 !/i3/config
 !/i3/i3blocks

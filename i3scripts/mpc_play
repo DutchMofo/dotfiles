@@ -1,0 +1,10 @@
+#!/usr/bin/perl
+
+my $selection=`xsel`;
+my $choice=`echo "$selection" | rofi -dmenu -p Play: `;
+
+if($choice =~ m/^\w+$/) {
+	print `mpv http://twitch.tv/$choice`;
+} else {
+	print `mpv $choice`;
+}
