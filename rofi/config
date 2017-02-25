@@ -5,5 +5,6 @@ rofi.color-window: argb:e02f343f, argb:e02f343f, #fefefa
 rofi.color-normal: argb:0000000, #fefefa, argb:c0383c4a, argb:e0586e75, #fefefa
 rofi.color-active: argb:0000000, #268bd2, argb:c0383c4a, #268bd2, #fefefa
 rofi.color-urgent: argb:0000000, #dc322f, argb:c0383c4a, #dc322f, #fefefa
-# rofi.width: 100
-# rofi.bw: 300
+rofi.fullscreen: true
+# rofi.width: 400
+rofi.bw: 250

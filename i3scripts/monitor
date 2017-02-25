@@ -18,12 +18,13 @@ if($button == 1) {
 	}
 	
 	if($output ne '') {
-		$args = "--output $output --auto --primary";
+		`xrandr --output $output --auto`;
+		`xrandr --output $output --primary`;
 		if($output =~ m/HDMI/) {
-			$args .= ' --set "Broadcast RGB" "Full"';
+			`xrandr --output $output --set 'Broadcast RGB' 'Full'`;
+			`xrandr --output $output --set audio on`;
 		}
 		`notify-send "Using monitor: $output"`;
-		`xrandr $args`;
 		foreach(@outputs) {
 			if($_ ne $output) {
 				`xrandr --output $_ --off`;

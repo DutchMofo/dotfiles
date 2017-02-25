@@ -7,7 +7,7 @@ exec --no-startup-id redshift -c ~/.config/redshift/config
 exec --no-startup-id compton --config ~/.config/compton/config
 exec --no-startup-id dunst -config ~/.config/dunst/config
 exec --no-startup-id exec nm-applet
-exec --no-startup-id exec ~/.config/i3scripts/wallpaper
+exec_always --no-startup-id exec ~/.config/i3scripts/wallpaper
 exec --no-startup-id python ~/.config/i3scripts/an2linuxserver.py
 
 set $mod Mod4
@@ -35,6 +35,7 @@ focus_follows_mouse no
 bindsym $mod+Return				exec --no-startup-id termite
 bindsym $mod+n					exec --no-startup-id thunar
 bindsym $mod+d					exec --no-startup-id rofi -show run
+bindsym $mod+y					exec --no-startup-id ~/.config/i3scripts/mpc_play &
 
 bindsym $mod+p					exec --no-startup-id ~/.config/i3scripts/monitor 1
 bindsym $mod+F1					exec --no-startup-id ~/.config/i3scripts/lock
@@ -43,9 +44,9 @@ bindsym $mod+Shift+p			exec --no-startup-id ~/.config/i3scripts/password
 # bindsym XF86Calculator			...
 
 # Volume controls
-bindsym XF86AudioMute			exec --no-startup-id /usr/bin/perl ~/.config/i3scripts/volume 3
-bindsym XF86AudioRaiseVolume	exec --no-startup-id /usr/bin/perl ~/.config/i3scripts/volume 4
-bindsym XF86AudioLowerVolume	exec --no-startup-id /usr/bin/perl ~/.config/i3scripts/volume 5
+bindsym XF86AudioMute			exec /usr/bin/perl ~/.config/i3scripts/volume 3
+bindsym XF86AudioRaiseVolume	exec /usr/bin/perl ~/.config/i3scripts/volume 4
+bindsym XF86AudioLowerVolume	exec /usr/bin/perl ~/.config/i3scripts/volume 5
 
 # MPD Controls
 bindsym Pause					exec --no-startup-id mpc toggle
@@ -149,10 +150,11 @@ client.focused			#007ACC		#007ACC		#cbd8e1		#007ACC
 client.unfocused		#0E213D		#0E213D		#cbd8e1		#007ACC
 client.focused_inactive	#0E213D		#0E213D		#cbd8e1		#007ACC
 client.urgent			#0E213D		#0E213D		#cbd8e1		#007ACC
-			
+
 bar {
 	status_command i3blocks -c ~/.config/i3/i3blocks
-	# separator_symbol " "
+	separator_symbol " "
+
 	position top
 	height 28
 	

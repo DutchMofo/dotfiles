@@ -2,7 +2,7 @@
 
 icon="$HOME/.config/i3scripts/pad.png"
 tmpbg='/tmp/screen.png'
-bg="$HOME/Pictures/umbrella.png"
+bg="/home/piet/Pictures/Wallpapers/umbrella.png"
 
 # scrot "$tmpbg"
 # convert "$tmpbg" -scale 50% -blur 0x20 -scale 200% "$tmpbg"
