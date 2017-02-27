@@ -139,17 +139,17 @@ mode "resize" {
 
 bindsym $mod+r					mode "resize"
 
-# Active blue:	007ACC
+# Active blue:	d79921
 # Text normal:	cbd8e1
-# Text urgent:	dc322f
+# Text urgent:	cc241d
 # Text nofocus:	6F8393
 # Background:	2F343F
 
 #                       title_lines	border		text		indicator
-client.focused			#007ACC		#007ACC		#cbd8e1		#007ACC
-client.unfocused		#0E213D		#0E213D		#cbd8e1		#007ACC
-client.focused_inactive	#0E213D		#0E213D		#cbd8e1		#007ACC
-client.urgent			#0E213D		#dc322f		#cbd8e1		#007ACC
+client.focused			#fabd2f		#fabd2f		#cbd8e1		#d79921
+client.unfocused		#d79921		#d79921		#cbd8e1		#d79921
+client.focused_inactive	#fabd2f		#fabd2f		#cbd8e1		#d79921
+client.urgent			#fabd2f		#cc241d		#cbd8e1		#d79921
 
 bar {
 	status_command i3blocks -c ~/.config/i3/i3blocks
@@ -159,12 +159,12 @@ bar {
 	height 24
 	
 	colors {
-		background #0E213D
+		background #282828
 		
 		# Workspace numbers
 		#					border		background	text
-		focused_workspace  	#0E213D		#0E213D		#cbd8e1
-		inactive_workspace 	#0E213D		#0E213D		#6F8393
-		urgent_workspace 	#dc322f		#dc322f		#ffffff
+		focused_workspace 	#fabd2f		#fabd2f		#ffffff
+		inactive_workspace	#d79921		#d79921		#ebdbb2
+		urgent_workspace 	#cc241d		#cc241d		#ffffff
 	}
 }
