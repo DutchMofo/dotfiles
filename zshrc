@@ -2,7 +2,7 @@
 export PATH=$PATH:/home/piet/.cargo/bin
 
 # Path to your oh-my-zsh installation.
-  export ZSH=/home/piet/.oh-my-zsh
+export ZSH=/home/piet/.oh-my-zsh
 
 export TERM=xterm-256color
 
@@ -105,3 +105,4 @@ function twitch {
 	#wait $mpv_pid
 	#kill $weechat_pid
 }
+

@@ -11,7 +11,7 @@ exec_always --no-startup-id exec ~/.config/i3scripts/wallpaper
 exec --no-startup-id python ~/.config/i3scripts/an2linuxserver.py
 
 set $mod Mod4
-font pango:M+ p2
+font pango:M+ p2 10
 
 gaps inner 4
 gaps outer 2
@@ -149,18 +149,17 @@ bindsym $mod+r					mode "resize"
 client.focused			#007ACC		#007ACC		#cbd8e1		#007ACC
 client.unfocused		#0E213D		#0E213D		#cbd8e1		#007ACC
 client.focused_inactive	#0E213D		#0E213D		#cbd8e1		#007ACC
-client.urgent			#0E213D		#0E213D		#cbd8e1		#007ACC
+client.urgent			#0E213D		#dc322f		#cbd8e1		#007ACC
 
 bar {
 	status_command i3blocks -c ~/.config/i3/i3blocks
 	separator_symbol " "
 
 	position top
-	height 28
+	height 24
 	
 	colors {
 		background #0E213D
-		# statusline #ffffff
 		
 		# Workspace numbers
 		#					border		background	text
