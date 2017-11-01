@@ -4,7 +4,7 @@ set relativenumber
 set number
 set tabstop=4
 set shiftwidth=4
-set cindent
+set smartindent
 syntax on
 hi Normal guibg=NONE ctermbg=NONE
 au BufNewFile,BufRead *.jolly set filetype=cpp
