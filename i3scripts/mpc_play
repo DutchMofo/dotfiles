@@ -1,10 +1,16 @@
 #!/usr/bin/perl
 
-my $selection=`xsel`;
-my $choice=`echo "$selection" | rofi -dmenu -p Play: `;
+use strict;
+use warnings;
 
-if($choice =~ m/^\w+$/) {
-	print `mpv http://twitch.tv/$choice`;
+my $selection=`xsel`;
+my $choice=`echo "$selection\nlirik\nshroud\nDrDisrespectLive\nAnthony_kongphan\nsacriel" | rofi -dmenu -p Play: `;
+
+print $choice;
+if($choice =~ /^\w+$/) {
+	`mpv http://twitch.tv/$choice`;
+} elsif($choice =~ /(https?:\/\/)?(www\.)?youtu(\.?be|be\.com)/) {
+	`mpv --ytdl-format 'bestvideo[height<=1080][fps>=50]+bestaudio/bestvideo[height<=1440]+bestaudio' $choice`;
 } else {
-	print `mpv $choice`;
+	`mpv $choice`;
 }
