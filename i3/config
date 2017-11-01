@@ -2,12 +2,16 @@
 # Please see http://i3wm.org/docs/userguide.html for a complete reference!
 # List all available keys: xmodmap -pke
 
+# Set keyboard and trackpad options
 exec_always --no-startup-id setxkbmap -option numpad:microsoft
+exec_always --no-startup-id xinput set-prop 14 291 1
+
+exec --no-startup-id xinput set-prop "SynPS/2 Synaptics TouchPad" 273 1
 exec --no-startup-id redshift -c ~/.config/redshift/config
 exec --no-startup-id compton --config ~/.config/compton/config
 exec --no-startup-id dunst -config ~/.config/dunst/config
 exec --no-startup-id exec nm-applet
-exec_always --no-startup-id exec ~/.config/i3scripts/wallpaper
+exec --no-startup-id exec ~/.config/i3scripts/wallpaper
 exec --no-startup-id python ~/.config/i3scripts/an2linuxserver.py
 
 set $mod Mod4
@@ -20,7 +24,8 @@ smart_gaps on
 # hide_edge_borders both
 
 # for_window [class=".*"] normal
-for_window [class=".*"] title_format " <span size='small'>%title</span>"
+# for_window [class=".*"] title_format " <span size='small'>%title</span>"
+for_window [class=".*"] title_format " %title"
 for_window [class=".*"] border pixel 3
 for_window [class="feh|Pavucontrol|SoundWireServer"] floating enable
 
@@ -34,19 +39,19 @@ focus_follows_mouse no
 
 bindsym $mod+Return				exec --no-startup-id termite
 bindsym $mod+n					exec --no-startup-id thunar
-bindsym $mod+d					exec --no-startup-id rofi -show run
+bindsym $mod+d					exec --no-startup-id rofi -show drun 
 bindsym $mod+y					exec --no-startup-id ~/.config/i3scripts/mpc_play &
-
+bindsym $mod+c                  exec --no-startup-id ~/.config/i3scripts/calc
+bindsym XF86Calculator          exec --no-startup-id ~/.config/i3scripts/calc
 bindsym $mod+p					exec --no-startup-id ~/.config/i3scripts/monitor 1
 bindsym $mod+F1					exec --no-startup-id ~/.config/i3scripts/lock
 bindsym $mod+Shift+q			kill
 bindsym $mod+Shift+p			exec --no-startup-id ~/.config/i3scripts/password
-# bindsym XF86Calculator			...
 
 # Volume controls
-bindsym XF86AudioMute			exec /usr/bin/perl ~/.config/i3scripts/volume 3
-bindsym XF86AudioRaiseVolume	exec /usr/bin/perl ~/.config/i3scripts/volume 4
-bindsym XF86AudioLowerVolume	exec /usr/bin/perl ~/.config/i3scripts/volume 5
+bindsym XF86AudioMute			exec --no-startup-id ~/.config/i3scripts/volume 3
+bindsym XF86AudioRaiseVolume	exec --no-startup-id ~/.config/i3scripts/volume 4
+bindsym XF86AudioLowerVolume	exec --no-startup-id ~/.config/i3scripts/volume 5
 
 # MPD Controls
 bindsym Pause					exec --no-startup-id mpc toggle
@@ -146,10 +151,10 @@ bindsym $mod+r					mode "resize"
 # Background:	2F343F
 
 #                       title_lines	border		text		indicator
-client.focused			#fabd2f		#fabd2f		#cbd8e1		#d79921
-client.unfocused		#d79921		#d79921		#cbd8e1		#d79921
-client.focused_inactive	#fabd2f		#fabd2f		#cbd8e1		#d79921
-client.urgent			#fabd2f		#cc241d		#cbd8e1		#d79921
+client.focused			#fabd2f		#fabd2f		#ffffff		#d79921
+client.unfocused		#d79921		#d79921		#edbdd2		#d79921
+client.focused_inactive	#fabd2f		#fabd2f		#edbdd2		#d79921
+client.urgent			#fabd2f		#cc241d		#ffffff		#d79921
 
 bar {
 	status_command i3blocks -c ~/.config/i3/i3blocks
@@ -168,3 +173,7 @@ bar {
 		urgent_workspace 	#cc241d		#cc241d		#ffffff
 	}
 }
+
+# Window format
+for_window [class="Pinentry"] floating enable
+for_window [class="Firefox" window_role="GtkFileChooserDialog"] resize set 1000 650
