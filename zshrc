@@ -4,6 +4,12 @@ export PATH=$PATH:/home/piet/.cargo/bin
 # Path to your oh-my-zsh installation.
 export ZSH=/home/piet/.oh-my-zsh
 
+# Force firefox gpu acceleration
+# export MOZ_USE_OMTC=1
+
+# disable Ctrl-Q and Ctrl-S in terminal
+stty -ixon
+
 export TERM=xterm-256color
 
 # Set name of the theme to load. Optionally, if you set this to "random"
