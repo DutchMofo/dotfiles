@@ -8,10 +8,10 @@ Changes: + line added, - line removed, ~ line changed
 # Problem: mpv video tearing
 # File: /etc/X11/xorg.conf.d/20-intel.conf
 
-+ Section "Device"
-+ 	Identifier  "IntelGraphics"
-+	Driver      "intel"
-+	Option      "TearFree" "true"
-+ EndSection
+Section "Device"
+	Identifier  "IntelGraphics"
+	Driver      "intel"
+	Option      "TearFree" "true"
+EndSection
 
 

@@ -8,7 +8,8 @@
 format = "<b>%s</b> %p\n%b\n<span font='9.5'>%a</span>"
 font = M+ p2 12
 
-allow_markup = yes
+icon_position = left
+markup = yes
 sort = yes
 indicate_hidden = yes
 alignment = left
@@ -36,7 +37,7 @@ padding = 8
 horizontal_padding = 8
 # [auto|frame|#color]
 separator_color = "#555555"
-startup_notification = false
+startup_notification = true
 dmenu = /usr/bin/rofi -p Rofi:
 browser = /usr/bin/firefox -new-tab
 
