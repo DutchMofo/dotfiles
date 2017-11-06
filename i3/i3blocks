@@ -61,7 +61,7 @@ command=date '+ %d-%m-%Y  %H:%M:%S'
 interval=1
 
 [volume]
-command=/usr/bin/perl ~/.config/i3scripts/volume
+command= ~/.config/i3scripts/volume
 interval=once
 signal=10
 min_width=  100%

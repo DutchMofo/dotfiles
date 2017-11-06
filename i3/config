@@ -3,13 +3,9 @@
 # List all available keys: xmodmap -pke
 
 # Set keyboard and trackpad options
-exec_always --no-startup-id setxkbmap -option numpad:microsoft
-exec_always --no-startup-id xinput set-prop 14 291 1
-
-exec --no-startup-id xinput set-prop "SynPS/2 Synaptics TouchPad" 273 1
 exec --no-startup-id redshift -c ~/.config/redshift/config
 exec --no-startup-id compton --config ~/.config/compton/config
-exec --no-startup-id dunst -config ~/.config/dunst/config
+exec --no-startup-id dunst
 exec --no-startup-id exec nm-applet
 exec --no-startup-id exec ~/.config/i3scripts/wallpaper
 exec --no-startup-id python ~/.config/i3scripts/an2linuxserver.py
@@ -23,12 +19,14 @@ smart_borders on
 smart_gaps on
 # hide_edge_borders both
 
-# for_window [class=".*"] normal
-# for_window [class=".*"] title_format " <span size='small'>%title</span>"
+# Window format
+for_window [class="Pinentry"] floating enable
+for_window [class="Firefox" window_role="GtkFileChooserDialog"] resize set 1000 650
 for_window [class=".*"] title_format " %title"
 for_window [class=".*"] border pixel 3
 for_window [class="feh|Pavucontrol|SoundWireServer"] floating enable
-
+# for_window [class=".*"] normal
+# for_window [class=".*"] title_format " <span size='small'>%title</span>"
 
 bindsym $mod+Shift+minus move scratchpad
 bindsym $mod+minus scratchpad show
@@ -173,7 +171,3 @@ bar {
 		urgent_workspace 	#cc241d		#cc241d		#ffffff
 	}
 }
-
-# Window format
-for_window [class="Pinentry"] floating enable
-for_window [class="Firefox" window_role="GtkFileChooserDialog"] resize set 1000 650

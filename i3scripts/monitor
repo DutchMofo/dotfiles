@@ -1,9 +1,10 @@
 #!/usr/bin/perl
 
-my $button = defined $ARGV[0] ?
-	$ARGV[0] :
-	(defined $ENV{'BLOCK_BUTTON'} ? $ENV{'BLOCK_BUTTON'} : 0);
+use strict;
+use warnings;
+use utf8;
 
+my $button = $ARGV[0] || $ENV{'block_button'} || 1;
 my $output;
 my $args;
 
@@ -20,11 +21,10 @@ if($button == 1) {
 	if($output ne '') {
 		$args = "--output $output --auto --primary";
 		if($output =~ m/HDMI/) {
-			$args .=  " --set 'Broadcast RGB' Full --set audio on";
-			`xrandr --dpi 96`;
+			$args .=  " --set 'Broadcast RGB' Full --set audio on --dpi 96";
 		}
 		if($output =~ m/LVDS/) {
-			`xrandr --dpi 100`;
+			$args .- " --dpi 100";
 		}
 		`xrandr $args`;
 		`notify-send "Using monitor: $output"`;

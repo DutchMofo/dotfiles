@@ -11,25 +11,22 @@ configuration {
     background:                  rgba(47,  52,  63,   90%);
     foreground:                  rgba(254, 254, 254, 100%);
 
-    selected-normal-background:  rgba(84,  29,  30,  100%);
-    selected-active-background:  rgba(82,  148, 226, 100%);
-    selected-urgent-background:  rgba(82,  148, 226, 100%);
+	// Normal: #2f343f
+	// Altern: #383c4a
+	// Urgent: #CC0000
+	// Active: #FF5500
+	
+    selected-normal-background:  #541d1e;
+    selected-active-background:  #B23C0E;
+    selected-urgent-background:  #960D0E;
+	
+    normal-background:           #2f343f;
+    active-background:           #A1461C;
+    urgent-background:           #85171C;
 
-    selected-normal-foreground:  rgba(255, 255, 255, 100%);
-    selected-active-foreground:  rgba(194, 202, 208, 100%);
-    selected-urgent-foreground:  rgba(220, 50,  47,  100%);
-
-    alternate-normal-background: rgba(56,  60,  74,  100%);
-    alternate-active-background: rgba(245, 245, 245, 100%);
-    alternate-urgent-background: rgba(245, 245, 245, 100%);
-
-    alternate-normal-foreground: @foreground;
-    alternate-active-foreground: @active-foreground;
-    alternate-urgent-foreground: @urgent-foreground;
-
-    normal-background:           rgba(47,  52,  63,  100%);
-    active-background:           rgba(255, 255, 255, 100%);
-    urgent-background:           rgba(255, 255, 255, 100%);
+	alternate-normal-background: #383c4a;
+	alternate-active-background: #A54A21;
+	alternate-urgent-background: #891B21;
 }
 
 #window {

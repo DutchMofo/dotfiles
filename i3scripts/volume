@@ -5,10 +5,7 @@ use warnings;
 use utf8;
 use open ':std', ':encoding(UTF-8)';
 
-my $button = defined $ARGV[0] ?
-	$ARGV[0] :
-	(defined $ENV{'BLOCK_BUTTON'} ? $ENV{'BLOCK_BUTTON'} : 0);
-
+my $button = $ARGV[0] || $ENV{'block_button'} || 0;
 my $sink_data = `pacmd list-sinks`;
 $sink_data =~ /\* index: (\d+)/;
 my $sink = $1;
