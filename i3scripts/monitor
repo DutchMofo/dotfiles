@@ -19,19 +19,15 @@ if($button == 1) {
 	}
 	
 	if($output ne '') {
-		$args = "--output $output --auto --primary";
-		if($output =~ m/HDMI/) {
-			$args .=  " --set 'Broadcast RGB' Full --set audio on --dpi 96";
-		}
-		if($output =~ m/LVDS/) {
-			$args .- " --dpi 100";
-		}
-		`xrandr $args`;
-		`notify-send "Using monitor: $output"`;
 		foreach(@outputs) {
 			if($_ ne $output) {
 				`xrandr --output $_ --off`;
 			}
+		}
+		`xrandr --output $output --auto --primary`;
+		`notify-send "Using monitor: $output"`;
+		if($output =~ m/HDMI/) {
+			`xrandr --output $output --set 'Broadcast RGB' Full --set audio on`;
 		}
 	}
 }

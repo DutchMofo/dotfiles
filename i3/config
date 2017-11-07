@@ -11,6 +11,8 @@ exec --no-startup-id exec ~/.config/i3scripts/wallpaper
 exec --no-startup-id python ~/.config/i3scripts/an2linuxserver.py
 
 set $mod Mod4
+set $alt Mod1
+
 font pango:M+ p2 10
 
 gaps inner 4
@@ -35,10 +37,11 @@ bindsym $mod+minus scratchpad show
 floating_modifier $mod
 focus_follows_mouse no
 
+bindsym $alt+Tab                exec ~/.config/i3scripts/alt_tab.sh
 bindsym $mod+Return				exec --no-startup-id termite
 bindsym $mod+n					exec --no-startup-id thunar
 bindsym $mod+d					exec --no-startup-id rofi -show drun 
-bindsym $mod+y					exec --no-startup-id ~/.config/i3scripts/mpc_play &
+bindsym $mod+y					exec --no-startup-id ~/.config/i3scripts/mpc_play
 bindsym $mod+c                  exec --no-startup-id ~/.config/i3scripts/calc
 bindsym XF86Calculator          exec --no-startup-id ~/.config/i3scripts/calc
 bindsym $mod+p					exec --no-startup-id ~/.config/i3scripts/monitor 1

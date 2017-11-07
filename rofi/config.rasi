@@ -1,10 +1,12 @@
 configuration {
-	width: 200;
-	disable-history: true;
-	fullscreen: true;
+	disable-history: false;
+	fullscreen: false;
 	show-icons: true;
 	cycle: false;
-	lines: 15;
+	width: 850;
+	lines: 20;
+	fixed-num-lines: false;
+	location: 0;
 }
 
 * {
@@ -31,7 +33,7 @@ configuration {
 
 #window {
     background-color: @background;
-    padding: 180px 300px;
+    // padding: 180px 300px;
 }
 #mainbox {
 	border-radius: 3px;
