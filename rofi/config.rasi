@@ -1,12 +1,21 @@
 configuration {
+	display-drun: "";
+	display-window: "";
+	display-run: "";
+	display-ssh: "";
+
 	disable-history: false;
 	fullscreen: false;
 	show-icons: true;
+	terminal: "termite";
 	cycle: false;
 	width: 850;
 	lines: 20;
 	fixed-num-lines: false;
 	location: 0;
+
+	window-format: "{w:3} {t}";
+	ssh-command: "{terminal} -e \"{ssh-client} {host}\"";
 }
 
 * {

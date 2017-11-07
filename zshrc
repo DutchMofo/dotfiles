@@ -95,7 +95,7 @@ DEFAULT_USER="piet"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 alias ls='ls --group-directories-first --time-style=+"%d.%m.%Y %H:%M" --color=auto -F'
-alias la='ls -A'
+alias la='ls -al'
 
 alias sudo='sudo '
 alias pi.mount="mount.cifs //192.168.192.100/myshare /mnt/pi -o user=pi"
