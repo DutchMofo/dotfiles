@@ -14,14 +14,13 @@
 #	convert $tmpbg $icon -gravity center -composite -matte $tmpbg 
 #fi
 
-# Really slow without --no-composite
-args="--blur=5 --no-composite --indicator -fe --radius=95
+args="--blur=7 --indicator -fe --radius=95
 	--textcolor=FEFEFEFF 
 	--insidecolor=2F344FFF --insidevercolor=2F344FFF --insidewrongcolor=2F344FFF 
 	--ringcolor=393C4AFF --ringvercolor=A54A21FF --ringwrongcolor=960D0EFF 
 	--keyhlcolor=1F7D29FF --bshlcolor=891B21FF 
-	--separatorcolor=00000000 --linecolor=00000000
-	-k --timestr=%H:%M --datestr=%d.%m.%Y --timecolor=FEFEFEFF"
+	--separatorcolor=00000000 --linecolor=0000002F
+	-k --timestr=%H:%M --datestr=%d.%m.%Y --timecolor=FEFEFEFF --datecolor=FEFEFEFF"
 
 killall -SIGUSR1 dunst # pause notifications
 if [[ $1 = 'suspend' ]]; then

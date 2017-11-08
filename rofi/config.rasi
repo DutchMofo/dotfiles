@@ -22,8 +22,9 @@ configuration {
     background:                  rgba(47,  52,  63,   90%);
     foreground:                  rgba(254, 254, 254, 100%);
 
-	// Normal: #2f343f
-	// Altern: #383c4a
+	// Good:   #0CBC01
+	// Normal: #2F343F
+	// Altern: #383C4A
 	// Urgent: #CC0000
 	// Active: #FF5500
 	
