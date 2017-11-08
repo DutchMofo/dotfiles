@@ -41,7 +41,7 @@ bindsym $alt+Tab                exec --no-startup-id ~/.config/i3scripts/alt_tab
 bindsym $mod+Return				exec --no-startup-id termite
 bindsym $mod+n					exec --no-startup-id thunar
 bindsym $mod+d					exec --no-startup-id rofi -show drun
-bindsym $mod+y					exec --no-startup-id rofi -show  -modi :~/.config/i3scripts/play
+bindsym $mod+y					exec --no-startup-id ~/.config/i3scripts/play
 bindsym $mod+c                  exec --no-startup-id ~/.config/i3scripts/calc
 bindsym XF86Calculator          exec --no-startup-id ~/.config/i3scripts/calc
 bindsym $mod+p					exec --no-startup-id ~/.config/i3scripts/monitor 1

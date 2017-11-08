@@ -19,7 +19,7 @@ args="--blur=5 --no-composite --indicator -fe --radius=95
 	--textcolor=FEFEFEFF 
 	--insidecolor=2F344FFF --insidevercolor=2F344FFF --insidewrongcolor=2F344FFF 
 	--ringcolor=393C4AFF --ringvercolor=A54A21FF --ringwrongcolor=960D0EFF 
-	--keyhlcolor=195321FF --bshlcolor=891B21FF 
+	--keyhlcolor=1F7D29FF --bshlcolor=891B21FF 
 	--separatorcolor=00000000 --linecolor=00000000
 	-k --timestr=%H:%M --datestr=%d.%m.%Y --timecolor=FEFEFEFF"
 
