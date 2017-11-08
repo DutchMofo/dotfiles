@@ -1,24 +1,33 @@
 #!/usr/bin/env bash
 
-icon="$HOME/.config/i3scripts/pad.png"
-tmpbg='/tmp/screen.png'
-bg="/home/piet/Pictures/Wallpapers/umbrella.png"
+#icon="$HOME/.config/i3scripts/pad.png"
+#tmpbg='/tmp/screen.png'
+#bg="/home/piet/Pictures/Wallpapers/umbrella.png"
 
 # scrot "$tmpbg"
 # convert "$tmpbg" -scale 50% -blur 0x20 -scale 200% "$tmpbg"
 
-resolution=$(xrandr | grep -Po "\d+x\d+.+\*" | awk '{print $1}')
+#resolution=$(xrandr | grep -Po "\d+x\d+.+\*" | awk '{print $1}')
 
-if [ ! -f $tmpbg ] || [ ${resolution} != $(identify -format "%wx%h" $tmpbg) ]; then
-	convert $bg -resize "$resolution^" -gravity center -crop $resolution+0+0 +repage $tmpbg
-	convert $tmpbg $icon -gravity center -composite -matte $tmpbg 
-fi
+#if [ ! -f $tmpbg ] || [ ${resolution} != $(identify -format "%wx%h" $tmpbg) ]; then
+#	convert $bg -resize "$resolution^" -gravity center -crop $resolution+0+0 +repage $tmpbg
+#	convert $tmpbg $icon -gravity center -composite -matte $tmpbg 
+#fi
+
+# Really slow without --no-composite
+args="--blur=5 --no-composite --indicator -fe --radius=95
+	--textcolor=FEFEFEFF 
+	--insidecolor=2F344FFF --insidevercolor=2F344FFF --insidewrongcolor=2F344FFF 
+	--ringcolor=393C4AFF --ringvercolor=A54A21FF --ringwrongcolor=960D0EFF 
+	--keyhlcolor=195321FF --bshlcolor=891B21FF 
+	--separatorcolor=00000000 --linecolor=00000000
+	-k --timestr=%H:%M --datestr=%d.%m.%Y --timecolor=FEFEFEFF"
 
 killall -SIGUSR1 dunst # pause notifications
 if [[ $1 = 'suspend' ]]; then
-	i3lock -e -i $tmpbg # Ignore empty
+	i3lock $args
 	systemctl suspend
 else
-	i3lock -e -n -i $tmpbg # Ignore empty, no deamon
+	i3lock $args -n
 fi
 killall -SIGUSR2 dunst # Resume notifications

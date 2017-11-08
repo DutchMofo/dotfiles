@@ -7,7 +7,7 @@ My arch linux config files.
 * compton
 * rofi
 * dunst
-* i3lock
+* i3lock-color
 * ImageMagick
 * [FontAwesome](https://aur.archlinux.org/packages/ttf-font-awesome/)
 * [M+](https://aur.archlinux.org/packages/ttf-mplus/)
