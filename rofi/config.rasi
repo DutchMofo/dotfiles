@@ -12,7 +12,6 @@ configuration {
 	width: 850;
 	lines: 20;
 	fixed-num-lines: false;
-	location: 0;
 
 	window-format: "{w:3} {t}";
 	ssh-command: "{terminal} -e \"{ssh-client} {host}\"";
@@ -44,6 +43,8 @@ configuration {
 #window {
     background-color: @background;
     // padding: 180px 300px;
+	position: center;
+	anchor: center;
 }
 #mainbox {
 	border-radius: 3px;
