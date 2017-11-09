@@ -24,10 +24,10 @@ if($button == 1) {
 				`xrandr --output $_ --off`;
 			}
 		}
-		`xrandr --output $output --auto --primary`;
-		`notify-send "Using monitor: $output"`;
 		if($output =~ m/HDMI/) {
-			`xrandr --output $output --set 'Broadcast RGB' Full --set audio on --dpi 96`;
+			$args = "--set 'Broadcast RGB' Full --set audio on --dpi 96";
 		}
+		`xrandr --output $output --auto --primary $args -s 0`;
+		`notify-send "Using monitor: $output"`;
 	}
 }
