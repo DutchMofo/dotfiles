@@ -5,29 +5,36 @@ use warnings;
 use utf8;
 
 my $button = $ARGV[0] || $ENV{'block_button'} || 1;
-my $output;
-my $args;
+my $args = '';
 
-if($button == 1) {
+if($button == 1)
+{
+	my $output;
 	my @outputs = (`xrandr` =~ /(\w+) connected/g);
 	if(scalar @outputs == 1) {
-		$output = @outputs[0];
+		$output = $outputs[0];
 	} else {
 		$args = join "\n", @outputs;
 		$output = `echo "$args" | rofi -dmenu`;
 		$output =~ s/\s+$//;
 	}
 	
-	if($output ne '') {
+	if($output ne '')
+	{
+		my $others = '';
 		foreach(@outputs) {
 			if($_ ne $output) {
-				`xrandr --output $_ --off`;
+				$others .= "--output $_ --off ";
 			}
+		}
+		if($output =~ m/LVDS/) {
+			$args = "--dpi 96";
 		}
 		if($output =~ m/HDMI/) {
 			$args = "--set 'Broadcast RGB' Full --set audio on --dpi 96";
 		}
-		`xrandr --output $output --auto --primary $args -s 0`;
+		`xrandr $others --output $output --auto --primary $args`;
+		`xrandr -s 0`; # Reset virual screen size
 		`notify-send "Using monitor: $output"`;
 	}
 }

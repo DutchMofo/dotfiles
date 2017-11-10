@@ -14,13 +14,15 @@
 #	convert $tmpbg $icon -gravity center -composite -matte $tmpbg 
 #fi
 
-args="--blur=7 --indicator -fe --radius=95
+# Show failure count, ignore empty
+args="--blur=7 -fe --radius=95
 	--textcolor=FEFEFEFF 
-	--insidecolor=2F344FFF --insidevercolor=2F344FFF --insidewrongcolor=2F344FFF 
+	--insidecolor=2F344F4F --insidevercolor=2F344F4F --insidewrongcolor=2F344F4F 
 	--ringcolor=393C4AFF --ringvercolor=A54A21FF --ringwrongcolor=960D0EFF 
 	--keyhlcolor=1F7D29FF --bshlcolor=891B21FF 
 	--separatorcolor=00000000 --linecolor=0000002F
-	-k --timestr=%H:%M --datestr=%d.%m.%Y --timecolor=FEFEFEFF --datecolor=FEFEFEFF"
+	-k --timestr=%H:%M --timecolor=FEFEFEFF --timepos=w-cw-0:h-ch-0 --timesize=60
+	--datestr=%d.%m.%Y --datecolor=FEFEFEFF --datepos=tx-14:ty+45 --datesize=35"
 
 killall -SIGUSR1 dunst # pause notifications
 if [[ $1 = 'suspend' ]]; then
