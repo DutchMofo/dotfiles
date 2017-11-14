@@ -1,40 +1,35 @@
-#!/usr/bin/perl
+#!/usr/bin/python
+from subprocess import Popen, PIPE, run
+import re
 
-use strict;
-use warnings;
-use utf8;
+xrandr = Popen(['xrandr'], stdout=PIPE)
+output_str = xrandr.communicate()[0].decode()
+output_re = re.finditer('(\w+) connected', output_str)
+outputs = list(map(lambda m: m.group(1), output_re))
 
-my $button = $ARGV[0] || $ENV{'block_button'} || 1;
-my $args = '';
+if len(outputs) == 1:
+	choice = outputs[0]
+else:
+	args = "\n".join(outputs)
+	rofi = Popen(['rofi', '-dmenu', '-p', ' '], \
+		stdin=PIPE, stdout=PIPE)
+	choice = rofi.communicate(args.encode())[0].decode()[:-1]
+		
+cmd = ['xrandr']
+for output in outputs:
+	if output != choice:
+		cmd.extend(['--output', output, '--off'])
 
-if($button == 1)
-{
-	my $output;
-	my @outputs = (`xrandr` =~ /(\w+) connected/g);
-	if(scalar @outputs == 1) {
-		$output = $outputs[0];
-	} else {
-		$args = join "\n", @outputs;
-		$output = `echo "$args" | rofi -dmenu`;
-		$output =~ s/\s+$//;
-	}
-	
-	if($output ne '')
-	{
-		my $others = '';
-		foreach(@outputs) {
-			if($_ ne $output) {
-				$others .= "--output $_ --off ";
-			}
-		}
-		if($output =~ m/LVDS/) {
-			$args = "--dpi 96";
-		}
-		if($output =~ m/HDMI/) {
-			$args = "--set 'Broadcast RGB' Full --set audio on --dpi 96";
-		}
-		`xrandr $others --output $output --auto --primary $args`;
-		`xrandr -s 0`; # Reset virual screen size
-		`notify-send "Using monitor: $output"`;
-	}
-}
+if choice != '':
+	cmd.extend(['--output', choice, '--auto', '--primary'])
+	if re.match('LVDS', choice):
+		cmd.extend(['--dpi', '96'])
+	elif re.match('HDMI', choice):
+		cmd.extend(['--dpi', '100', \
+			'--set', 'Broadcast RGB', 'Full', \
+			'--set', 'audio', 'on'])
+
+run(cmd)
+run(['xrandr', '-s', '0'])
+run(['notify-send', 'Output', 'Using monitor: '+ choice])
+
