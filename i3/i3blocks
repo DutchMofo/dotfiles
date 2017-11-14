@@ -26,9 +26,10 @@ separator_block_width=15
 markup=pango
 color=#CBD8E1
 
-[monitor]
-full_text=
-command=~/.config/i3scripts/monitor
+[twitch]
+label=
+command=~/.config/i3scripts/twitch
+interval=300
 
 [memory]
 label=

@@ -1,0 +1,48 @@
+#!/usr/bin/python3
+from json import loads as json_decode
+from subprocess import Popen, PIPE
+import re
+
+json_cache='/tmp/twitch.json'
+
+try:
+	with open(json_cache, 'r') as cache:
+		streams = json_decode(cache.read())
+except IOError:
+	streams = []
+
+
+max_name = 0
+max_viewers = 0
+for stream in streams:
+	stream['viewers'] = '{0:,}'.format(stream['viewers']) \
+		.replace(',', '.')
+	max_viewers = max(max_viewers, len(stream['viewers']))
+	max_name    = max(max_name, len(stream['display_name']))
+
+options = ''
+max_name += 1
+for stream in streams:
+	name = stream['display_name']
+	game = stream['game']
+	viewers = stream['viewers']
+	options += (' ' * (max_viewers - len(viewers))) + viewers + ' ' \
+		+ name + (' ' * (max_name - len(name))) \
+		+ '[' + game + ']\n'
+
+# Cut final newline
+options = options[:-1]
+
+rofi = Popen(['rofi', '-dmenu', '-p', ' ', '-i'], \
+	stdin=PIPE, stdout=PIPE)
+choice = rofi.communicate(options.encode())[0].decode()
+
+m = re.match('^ *[\d,\.]+ (\w+) +\[.+\]$', choice)
+if m:
+	Popen(['mpv', 'https://twitch.tv/' + m.group(1)])
+elif re.match('^(https:\/\/)?(www\.)?youtu(\.be|be\.com)', choice):
+	quality = 'bestvideo[height<=1080][fps>=50]+bestaudio/bestvideo[height<=1440]+bestaudio'
+	Popen(['mpv', '--ytdl-format', quality, choice])
+else:
+	Popen(['mpv', choice])
+

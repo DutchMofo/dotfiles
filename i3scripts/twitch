@@ -1,0 +1,56 @@
+#!/usr/bin/python3
+from urllib.request import Request, urlopen, URLError, HTTPError
+from json import dumps as json_encode, loads as json_decode
+import os
+import subprocess
+
+json_cache = '/tmp/twitch.json'
+secrets_path = os.path.expanduser('~') + '/.config/secrets.json'
+
+with open(secrets_path) as secrets_file:
+	secrets = json_decode(secrets_file.read())
+
+re = Request('https://api.twitch.tv/kraken/streams/followed')
+re.add_header('Client-ID', secrets['twitch_client_id'])
+re.add_header('Authorization', secrets['twitch_user_oauth'])
+
+try:
+	response = urlopen(re).read()
+	streams = json_decode(response.decode('utf-8'))
+
+	try:
+		with open(json_cache, 'r') as cache:
+			prev_streams = json_decode(cache.read())
+			prev_streams = list(map(lambda s: s['name'], prev_streams))
+	except IOError:
+		prev_streams = []
+
+	went_live = []
+	live_streams = []
+	for stream in streams['streams']:
+		if stream['stream_type'] != 'live':
+			continue
+		channel = stream['channel']
+		live_streams.append({
+			'name': channel['name'],
+			'display_name': channel['display_name'],
+			'game': stream['game'],
+			'viewers': stream['viewers'],
+		})
+		if channel['name'] not in prev_streams:
+			went_live.append(channel['display_name'])
+
+	if len(went_live) > 0:
+		subprocess.run(['notify-send', 'Twitch', '\n'.join(went_live)])
+
+except (URLError, HTTPError):
+	live_streams = []
+
+try:
+	with open(json_cache, 'w') as cache:
+		cache.write(json_encode(live_streams))
+except IOError:
+	print('Failed to write cache')
+	exit()
+
+print(len(live_streams))
