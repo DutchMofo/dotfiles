@@ -1,15 +1,23 @@
-#!/usr/bin/perl
+#!/usr/bin/python3
+from subprocess import Popen, PIPE
+import os
+import re
 
-`ip route` =~ /dev (\w+) .+ (\d+\.\d+\.\d+\.\d+)/;
-my $dev = $1;
-my $ip = $2;
-my $signal;
+route = Popen(['ip', 'route'], stdout=PIPE)
+route = route.communicate()[0].decode()
+match = re.match('default via (\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}) dev (\w+)', route)
+match or exit()
 
+dev = match.group(2)
+ip  = match.group(1)
 
-if( -d "/sys/class/net/$dev/wireless") {
-	my $reg_dev = quotemeta $dev;
-	`cat /proc/net/wireless` =~ /$reg_dev: \d+ \s*(\d+)/;
-	$signal = ' '.int($1 * 100 / 70 + 0.5).'%';
-}
-
-print "$ip$signal";
+try:
+	if os.path.exists(f'/sys/class/net/{dev}/wireless'):
+		with(open("/proc/net/wireless", 'r')) as signal_info:
+			match = re.match(f'{dev}: \d+ \s*(\d+)', signal_info.read())
+			signal = float(match.group(1))
+			signal = int(signal * 100. / 70. + .5)
+			print(ip + ' ' + signal)
+	print(ip)
+except IOError:
+	print(ip)

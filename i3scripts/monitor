@@ -31,5 +31,5 @@ if choice != '':
 
 run(cmd)
 run(['xrandr', '-s', '0'])
-run(['notify-send', 'Output', 'Using monitor: '+ choice])
+run(['notify-send', 'Output', 'Using monitor: ' + choice])
 
