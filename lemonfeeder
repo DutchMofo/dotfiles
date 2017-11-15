@@ -1,0 +1,85 @@
+#!/usr/bin/python3
+from subprocess import Popen, PIPE
+from threading import Thread, Lock
+import time, os, select
+
+def mix(f, t, a):
+	def from_color(color):
+		color = int(color[1:], 16)
+		return (color >> 16 & 0xFF, color >> 8 & 0xFF, color & 0xFF)
+
+	f = from_color(f)
+	t = from_color(t)
+	color = (
+		int(f[0] + (t[0] - f[0]) * a),
+		int(f[1] + (t[1] - f[1]) * a),
+		int(f[2] + (t[2] - f[2]) * a))
+	return '#' + \
+		hex(color[0] << 16 | color[1] << 8 | color[2])[2:]
+
+colors = {
+	'text':   '#FEFEFE',
+	'normal': '#2F343F',
+	'altern': '#383C3A',
+	'good':   '#0CBC01',
+	'urgent': '#CC0000',
+	'active': '#FF5500',
+}
+theme = {
+	'foreground': colors['text'],
+	'background': colors['normal'],
+	'selected': mix(colors['normal'], colors['active'], 0.5),
+	'purple': '#8e44ad',
+}
+
+def button(action, content):
+	return f'%{{A:{action}:}}{content}%{{A}}';
+def underline(text):
+	return f'%{{+u}}{text}%{{-u}}';
+def bg(color, text):
+	normal = theme['background']
+	return f'%{{B{color}}}{text}%{{B{normal}}}';
+	
+
+class Widget(object):
+	def render(self):
+		return ''
+
+class Twitch(Widget):
+	def render(self):
+		return bg(theme['purple'], button('twitch', ' Twitch '))
+
+widgets = [Twitch()]
+bar_args = [
+	'lemonbar',
+	'-u', '2',
+	'-g', '1366x30+0+0',
+	'-B', theme['background'],
+	'-F', theme['foreground'],
+	'-U', theme['selected'],
+]
+
+lock = Lock()
+bar = Popen(bar_args, stdin=PIPE, stdout=PIPE)
+def render():
+	bar_str = '%{O5}' + ' | '.join(w.render() for w in widgets) + '\n'
+	bar.stdin.write(bar_str.encode())
+	bar.stdin.flush()
+	
+def poll_clicks():
+	global bar, lock
+
+	while True:
+		ready, _, _ = select.select([bar.stdout], [], [], 5)
+		lock.acquire()
+		if len(ready) > 0:
+			line = bar.stdout.readline().decode()
+			print(line)
+		render()
+		lock.release()	
+render()
+click_thread = Thread(target = poll_clicks, args = [])
+click_thread.start()
+
+while True:
+	time.sleep(100000)
