@@ -1,5 +1,5 @@
 # If you come from bash you might have to change your $PATH.
-export PATH=$PATH:/home/piet/.cargo/bin
+# export PATH=$PATH:/home/piet/.cargo/bin
 
 # Path to your oh-my-zsh installation.
 export ZSH=/home/piet/.oh-my-zsh
@@ -61,6 +61,7 @@ ZSH_THEME="agnoster"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git)
 
+ZSH_COMPDUMP="${HOME}/.config/compdump"
 source $ZSH/oh-my-zsh.sh
 
 DEFAULT_USER="piet"

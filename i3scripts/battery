@@ -3,7 +3,7 @@ from subprocess import Popen, PIPE
 import re
 
 acpi = Popen(['acpi', '-b'], stdout=PIPE)
-match = re.match('^Battery (\d+): (\w+), (\d+)%(?:, (\d{2}:\d{2}:\d{2}) \w+)$', \
+match = re.match('^Battery (\d+): (\w+), (\d+)%(?:, (\d{2}:\d{2}:\d{2}) \w+)?$', \
 	acpi.communicate()[0].decode())
 match or exit()
 

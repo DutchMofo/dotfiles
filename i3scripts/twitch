@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 from urllib.request import Request, urlopen, URLError, HTTPError
 from json import dumps as json_encode, loads as json_decode
-import os
 import subprocess
+import os
 
 json_cache = '/tmp/twitch.json'
 secrets_path = os.path.expanduser('~') + '/.config/secrets.json'
@@ -10,12 +10,12 @@ secrets_path = os.path.expanduser('~') + '/.config/secrets.json'
 with open(secrets_path) as secrets_file:
 	secrets = json_decode(secrets_file.read())
 
-re = Request('https://api.twitch.tv/kraken/streams/followed')
-re.add_header('Client-ID', secrets['twitch_client_id'])
-re.add_header('Authorization', secrets['twitch_user_oauth'])
-
 try:
+	re = Request('https://api.twitch.tv/kraken/streams/followed')
+	re.add_header('Client-ID', secrets['twitch_client_id'])
+	re.add_header('Authorization', secrets['twitch_user_oauth'])
 	response = urlopen(re).read()
+
 	streams = json_decode(response.decode('utf-8'))
 
 	try:

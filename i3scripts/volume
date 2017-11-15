@@ -1,35 +1,42 @@
-#!/usr/bin/perl
+#!/usr/bin/python3
+from subprocess import Popen, PIPE, run
+import time
+import os
+import re
 
-use strict;
-use warnings;
-use utf8;
-use open ':std', ':encoding(UTF-8)';
+def sink_volume():
+	pacmd = Popen(['pacmd', 'list-sinks'], stdout=PIPE)
+	pacmd = pacmd.communicate()[0].decode()
 
-my $button = $ARGV[0] || $ENV{'block_button'} || 0;
-my $sink_data = `pacmd list-sinks`;
-$sink_data =~ /\* index: (\d+)/;
-my $sink = $1;
+	sink = re.search('\* index: (\d+)', pacmd) or exit()
+	end = pacmd.index('properties:', sink.start())
+	pacmd = pacmd[sink.start() : end]
+	sink = sink.group(1)
 
-if($button != 0) {
-	if($button == 3) { `pactl set-sink-mute $sink toggle`; }
-	elsif($button == 4) { `pactl set-sink-volume $sink +5%`; }
-	elsif($button == 5) { `pactl set-sink-volume $sink -5%`; }
-	$sink_data = `pacmd list-sinks`;
-}
+	volume = int(re.search('volume: front-left: \d+ / +(\d+)%', pacmd).group(1))
+	muted  = re.search('muted: (yes|no)', pacmd).group(1)
+	return (sink, volume, muted == 'yes')
 
-$sink_data =~ /volume:.*?([0-9]+)%/;
-my $volume = $1;
-$sink_data =~ /muted: (yes|no)/;
-my $muted = $1;
+button = int(os.getenv('BLOCK_BUTTON') or 0)
+volume = sink_volume()
 
-if(defined $ARGV[0]) {
-	`pkill -RTMIN+10 i3blocks`;
-}
+if button != 0:
+	if   button == 3:
+		run(['pactl', 'set-sink-mute', volume[0], 'toggle'])
+	elif button == 4:
+		run(['pactl', 'set-sink-volume', volume[0], '+5%'])
+	elif button == 5:
+		run(['pactl', 'set-sink-volume', volume[0], '-5%'])
+	pacmd = Popen(['pacmd', 'list-sinks'], stdout=PIPE)
+	pacmd = pacmd.communicate()[0].decode()[sink_start:]
+	volume = sink_volume()
 
-my $text;
-if($muted eq 'yes') { $text = ''; }
-elsif($volume < 35) { $text = ''; }
-else				{ $text = ''; }
-$text .= (' ' x (4 - length $volume))."$volume%\n";
+if volume[2]:
+	icon = ''
+elif volume[1] < 35:
+	icon = ''
+else:
+	icon = ''
 
-print $text.$text;
+volume = str(volume[1])
+print(icon + (' ' * (4 - len(volume))) + volume + '%')

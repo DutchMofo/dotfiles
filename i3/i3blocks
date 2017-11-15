@@ -63,9 +63,7 @@ interval=1
 
 [volume]
 command= ~/.config/i3scripts/volume
-interval=once
-signal=10
-min_width=  100%
+interval=60
 
 [battery]
 command=~/.config/i3scripts/battery
