@@ -36,7 +36,7 @@ theme = {
 }
 
 def button(action, content, btn=1):
-	return f'%{{A{btn}:{action}:}}{content}%{{A}}'
+	return '%{A'+str(btn)+':'+action+':}'+content+'%{A}'
 def underline(text):
 	return f'%{{+u}}{text}%{{-u}}';
 def bg(color, text):
@@ -113,27 +113,20 @@ class I3Workspaces(Widget):
 			return
 
 		workspaces = i3.get_workspaces()
-		active = None
-		for ws in workspaces:
-			if ws.focused:
-				active = ws.num
+		index = None
+		for i in range(0, len(workspaces)):
+			if workspaces[i].focused:
+				index = i
+				break
 
 		if args[0] == 'prev':
-			prev = None
-			for ws in workspaces:
-				if ws.num == active:
-					if prev != None:
-						self.goto(prev.num)
-					break
-				prev = ws
+			index -= 1
+			if index >= 0:
+				self.goto(workspaces[index].num)
 		elif args[0] == 'next':
-			go = False
-			for ws in workspaces:
-				if ws.num == active:
-					go = True
-				if go:
-					self.goto(ws.num)
-					break
+			index += 1
+			if index < len(workspaces):
+				self.goto(workspaces[index].num)
 
 class I3WindowTitle(Widget):
 	lock = None
@@ -213,18 +206,18 @@ class Twitch(Widget):
 					went_live.append(channel['display_name'])
 
 			if len(went_live) > 0:
-				subprocess.run(['notify-send', 'Twitch', '\n'.join(went_live)])
+				run(['notify-send', 'Twitch', '\n'.join(went_live)])
 
 		except (URLError, HTTPError) as e:
 			print(e)
 			live_streams = []
 
-		self.count = len(live_streams)
 		with open(json_cache, 'w') as cache:
 			cache.write(json_encode(live_streams))
 
 		self.lock.acquire()
 		self.dont_submit = True
+		self.count = len(live_streams)
 		self.dirty = True
 		render_all()
 		self.lock.release()
@@ -233,7 +226,7 @@ class Time(Widget):
 	def __init__(self):
 		self.timer = 10
 	def render(self):
-		time = datetime.datetime.now().strftime('  %Y-%m-%d  %H:%M  ') 
+		time = datetime.datetime.now().strftime('  %Y-%m-%d | %H:%M  ') 
 		color = mix(theme['background'], '#3498db', 0.3);
 		return bg(color, time)
 
@@ -352,15 +345,14 @@ def render_widgets(widgets):
 	return ''.join(w.render_widget() for w in widgets)	
 
 def render_all():
-	bar_str = render_widgets(left_widgets)
-	bar_str = button('workspace prev', bar_str, 3)
-	bar_str = button('workspace next', bar_str, 4)
-	bar_str += '%{c}' # Align center
-	bar_str += render_widgets(center_widgets)
-	#bar_str = button('workspace prev', bar_str, 3)
-	#bar_str = button('workspace next', bar_str, 4)
-	bar_str += '%{r}' # Align right
-	bar_str += render_widgets(right_widgets)
+	left = render_widgets(left_widgets)
+	left = button('workspace prev', left, 4)
+	left = button('workspace next', left, 5)
+	center = render_widgets(center_widgets)
+	center = button('workspace prev', center, 4)
+	center = button('workspace next', center, 5)
+	right = render_widgets(right_widgets)
+	bar_str = left+'%{c}'+center+'%{r}'+right
 	bar.stdin.write((bar_str + '\n').encode())
 	bar.stdin.flush()
 

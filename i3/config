@@ -157,19 +157,20 @@ client.focused_inactive	#fabd2f		#fabd2f		#edbdd2		#d79921
 client.urgent			#fabd2f		#cc241d		#ffffff		#d79921
 
 bar {
-	status_command i3blocks -c ~/.config/i3/i3blocks
-	separator_symbol " "
+	i3bar_command ~/.config/lemonfeeder
+#	status_command i3blocks -c ~/.config/i3/i3blocks
+#	separator_symbol " "
 
-	position top
-	height 24
+#	position top
+#	height 24
 	
-	colors {
-		background #282828
+#	colors {
+#		background #282828
 		
 		# Workspace numbers
 		#					border		background	text
-		focused_workspace 	#fabd2f		#fabd2f		#ffffff
-		inactive_workspace	#d79921		#d79921		#ebdbb2
-		urgent_workspace 	#cc241d		#cc241d		#ffffff
-	}
+#		focused_workspace 	#fabd2f		#fabd2f		#ffffff
+#		inactive_workspace	#d79921		#d79921		#ebdbb2
+#		urgent_workspace 	#cc241d		#cc241d		#ffffff
+#	}
 }
