@@ -14,10 +14,11 @@ ip  = match.group(1)
 try:
 	if os.path.exists(f'/sys/class/net/{dev}/wireless'):
 		with(open("/proc/net/wireless", 'r')) as signal_info:
-			match = re.match(f'{dev}: \d+ \s*(\d+)', signal_info.read())
+			match = re.search(f'{dev}: \d+ +(\d+)', signal_info.read())
 			signal = float(match.group(1))
 			signal = int(signal * 100. / 70. + .5)
-			print(ip + ' ' + signal)
-	print(ip)
+			print(ip + ' ' + str(signal) + '%')
+	else:
+		print(ip)
 except IOError:
 	print(ip)

@@ -1,7 +1,10 @@
 #!/usr/bin/python3
-from subprocess import Popen, PIPE
-from threading import Thread, Lock
-import time, os, select
+from subprocess import Popen, PIPE, run
+from concurrent.futures import ThreadPoolExecutor
+from urllib.request import Request, urlopen, URLError, HTTPError
+from json import dumps as json_encode, loads as json_decode
+from threading import RLock
+import os, select, i3ipc, signal, datetime, re, time
 
 def mix(f, t, a):
 	def from_color(color):
@@ -32,54 +35,345 @@ theme = {
 	'purple': '#8e44ad',
 }
 
-def button(action, content):
-	return f'%{{A:{action}:}}{content}%{{A}}';
+def button(action, content, btn=1):
+	return f'%{{A{btn}:{action}:}}{content}%{{A}}'
 def underline(text):
 	return f'%{{+u}}{text}%{{-u}}';
 def bg(color, text):
 	normal = theme['background']
-	return f'%{{B{color}}}{text}%{{B{normal}}}';
-	
+	return f'%{{B{color}}}{text}%{{B{normal}}}'
+def fg(color, text):
+	normal = theme['foreground']
+	return f'%{{F{color}}}{text}%{{F{normal}}}'
 
 class Widget(object):
+	last_time = 0
+	timer = 0
+	dirty = True
+	cached = ''
+
+	def render_widget(self):
+		now = time.time()
+		if self.timer > 0 and self.last_time + self.timer <= now:
+			self.dirty = True
+			self.last_time = now
+		if not self.dirty:
+			return self.cached
+		self.dirty = False
+		self.cached = self.render()
+		return self.cached
 	def render(self):
 		return ''
+	def action(self):
+		pass
+
+class I3Workspaces(Widget):
+	lock = None
+	i3 = None
+	def __init__(self, hooks, i3, lock):
+		self.timer = 5
+		self.lock = lock
+		self.i3 = i3
+		i3.on('workspace::focus', self.on_workspace_focus)
+		hooks['workspace'] = self
+	def on_workspace_focus(self, i3, e):
+		self.lock.acquire()
+		self.dirty = True
+		render_all()
+		self.lock.release()
+	def render(self):
+		window = i3.get_tree().find_focused().name
+		workspaces = i3.get_workspaces()
+		ids = []
+		max_ws = 0
+		for workspace in workspaces:
+			ids.append(workspace.num)
+			if workspace.num > max_ws:
+				max_ws = workspace.num
+
+		parts = []
+		index = 0
+		for _id in range(1, max_ws + 1):
+			if _id not in ids:
+				parts.append(button(f'workspace select {_id}', '\uf10c'))
+				continue
+			workspace = workspaces[index]
+			text = '\uf111' if workspace.visible else '\uf192'
+			text = button(f'workspace select {_id}', text)
+			if workspace.urgent:
+				text = fg(colors['urgent'], text)
+			parts.append(text)
+			index += 1
+		return ' '.join(parts)
+	def goto(self, nr):
+		i3.command(f'workspace {nr}')
+	def action(self, args):
+		if args[0] == 'select':	
+			self.goto(args[1])
+			return
+
+		workspaces = i3.get_workspaces()
+		active = None
+		for ws in workspaces:
+			if ws.focused:
+				active = ws.num
+
+		if args[0] == 'prev':
+			prev = None
+			for ws in workspaces:
+				if ws.num == active:
+					if prev != None:
+						self.goto(prev.num)
+					break
+				prev = ws
+		elif args[0] == 'next':
+			go = False
+			for ws in workspaces:
+				if ws.num == active:
+					go = True
+				if go:
+					self.goto(ws.num)
+					break
+
+class I3WindowTitle(Widget):
+	lock = None
+	i3 = None
+	def __init__(self, i3, lock):
+		self.timer = 5
+		self.lock = lock
+		self.i3 = i3
+		i3.on('window::focus', self.on_window_focus)
+	def on_window_focus(self, i3, e):
+		self.lock.acquire()
+		self.dirty = True
+		render_all()
+		self.lock.release()
+	def render(self):
+		window = i3.get_tree().find_focused().name
+		if len(window) > 47:
+			window = window[:47] + '...'
+		return window
 
 class Twitch(Widget):
-	def render(self):
-		return bg(theme['purple'], button('twitch', ' Twitch '))
+	lock = None
+	pool = None
+	secrets = ''
+	json_cache = '/tmp/twitch.json'
+	dont_submit = False
+	count = 0
 
-widgets = [Twitch()]
+	def __init__(self, hooks, pool, lock):
+		self.timer = 5 * 60
+		self.lock = lock
+		self.pool = pool
+		hooks['twitch'] = self
+		path = os.path.expanduser('~')+'/.config/secrets.json'
+		with open(path, 'r') as _file:
+			self.secrets = json_decode(_file.read())
+	def render(self):
+		if not self.dont_submit:
+			self.pool.submit(self.load_streams)
+		else:
+			self.dont_submit = False
+		twitch = f'  \uf1e8 {self.count}  '
+		twitch = button('twitch', twitch)
+		return bg(theme['purple'], twitch)
+	def action(self, args):
+		self.pool.submit(self.load_streams)
+	def load_streams(self):
+		json_cache = self.json_cache
+		secrets = self.secrets
+		try:
+			re = Request('https://api.twitch.tv/kraken/streams/followed')
+			re.add_header('Client-ID', secrets['twitch_client_id'])
+			re.add_header('Authorization', secrets['twitch_user_oauth'])
+			response = urlopen(re).read()
+			streams = json_decode(response.decode('utf-8'))
+
+			try:
+				with open(json_cache, 'r') as cache:
+					prev_streams = json_decode(cache.read())
+					prev_streams = list(map(lambda s: s['name'], prev_streams))
+			except IOError:
+				prev_streams = []
+
+			went_live = []
+			live_streams = []
+			for stream in streams['streams']:
+				if stream['stream_type'] != 'live':
+					continue
+				channel = stream['channel']
+				live_streams.append({
+					'name': channel['name'],
+					'display_name': channel['display_name'],
+					'game': stream['game'],
+					'viewers': stream['viewers'],
+				})
+				if channel['name'] not in prev_streams:
+					went_live.append(channel['display_name'])
+
+			if len(went_live) > 0:
+				subprocess.run(['notify-send', 'Twitch', '\n'.join(went_live)])
+
+		except (URLError, HTTPError) as e:
+			print(e)
+			live_streams = []
+
+		self.count = len(live_streams)
+		with open(json_cache, 'w') as cache:
+			cache.write(json_encode(live_streams))
+
+		self.lock.acquire()
+		self.dont_submit = True
+		self.dirty = True
+		render_all()
+		self.lock.release()
+
+class Time(Widget):
+	def __init__(self):
+		self.timer = 10
+	def render(self):
+		time = datetime.datetime.now().strftime('  %Y-%m-%d  %H:%M  ') 
+		color = mix(theme['background'], '#3498db', 0.3);
+		return bg(color, time)
+
+class Volume(Widget):
+	lock = None
+	def __init__(self, hooks, lock):
+		self.lock = lock
+		hooks['volume'] = self
+	def sink_match(self):
+		pacmd = Popen(['pacmd', 'list-sinks'], stdout=PIPE)
+		pacmd = pacmd.communicate()[0].decode()
+		return re.search('\* index: (\d+)', pacmd)		
+	def render(self):
+		match = self.sink_match()
+		end  = match.string.index('properties:', match.start())
+		info = match.string[match.start() : end]
+		volume = int(re.search('volume: front-left: \d+ / +(\d+)%', info).group(1))
+		muted  = re.search('muted: (yes|no)', info).group(1) == 'yes'
+
+		if muted:
+			icon = ''
+		elif volume < 35:
+			icon = ''
+		else:
+			icon = ''
+		volume = str(volume)
+		volume = '  ' + icon + (' ' * (4 - len(volume))) + volume + '%  '
+		volume = button('volume up', volume, 3)
+		volume = button('volume down', volume, 4)
+		volume = button('volume mute', volume, 5)
+		return volume
+	def action(self, args):
+		sink = self.sink_match().group(1)
+		if args[0] == 'up':
+			run(['pactl', 'set-sink-mute', sink, 'toggle'])
+		elif args[0] == 'down':
+			run(['pactl', 'set-sink-volume', sink, '+5%'])
+		elif args[0] == 'mute':
+			run(['pactl', 'set-sink-volume', sink, '-5%'])
+		self.lock.acquire()
+		self.dirty = True
+		render_all()
+		self.lock.release()
+
+class Battery(Widget):
+	def __init__(self):
+		self.timer = 10
+	def render(self):
+		acpi = Popen(['acpi', '-b'], stdout=PIPE)
+		match = re.match('^Battery (\d+): (\w+), (\d+)%(?:, (\d{2}:\d{2}:\d{2}) \w+)?$', \
+			acpi.communicate()[0].decode())
+		if match is None:
+			return ''
+
+		status  = match.group(2)
+		percent = int(match.group(3))
+		if   percent < 25:
+			color = '#FF0000'
+			icon  = ''
+		elif percent < 50:
+			color = '#FFF600'
+			icon  = ''
+		elif percent < 85:
+			color = '#A8FF00'
+			icon  = ''
+		else:
+			color = '#A8FF00'
+			icon  = ''
+
+		percent = str(percent)
+		text = '  ' + fg(color, icon) \
+			+ (' ' * (4 - len(percent))) \
+			+ percent + '%'
+
+		if status == 'Charging' or status == 'Full':
+			text += '   ';
+		elif status == 'Discharging':
+			text += ' ('+match.group(4)+')  '
+		color = mix(theme['background'], '#1abc9c', 0.5)
+		return bg(color, text)
+
+lock = RLock()
+i3 = i3ipc.Connection()
+pool = ThreadPoolExecutor(max_workers=3)
+pool.submit(i3.main)
+
+hooks = { }
+left_widgets = [
+	I3Workspaces(hooks, i3, lock),
+]
+center_widgets = [
+	I3WindowTitle(i3, lock),
+]
+right_widgets = [
+	Twitch(hooks, pool, lock),
+	Time(),
+	Volume(hooks, lock),
+	Battery(),
+]
+
 bar_args = [
 	'lemonbar',
-	'-u', '2',
-	'-g', '1366x30+0+0',
+	'-u', '2',  # Underline thickness
+	'-a', '20', # Max clickable areas
+	'-g', '1920x30+0+0',
 	'-B', theme['background'],
 	'-F', theme['foreground'],
 	'-U', theme['selected'],
+
+	'-f', 'Droid Sans-10',
+	'-f', 'FontAwesome-11',
 ]
 
-lock = Lock()
 bar = Popen(bar_args, stdin=PIPE, stdout=PIPE)
-def render():
-	bar_str = '%{O5}' + ' | '.join(w.render() for w in widgets) + '\n'
-	bar.stdin.write(bar_str.encode())
-	bar.stdin.flush()
-	
-def poll_clicks():
-	global bar, lock
+def render_widgets(widgets):
+	return ''.join(w.render_widget() for w in widgets)	
 
+def render_all():
+	bar_str = render_widgets(left_widgets)
+	bar_str = button('workspace prev', bar_str, 3)
+	bar_str = button('workspace next', bar_str, 4)
+	bar_str += '%{c}' # Align center
+	bar_str += render_widgets(center_widgets)
+	#bar_str = button('workspace prev', bar_str, 3)
+	#bar_str = button('workspace next', bar_str, 4)
+	bar_str += '%{r}' # Align right
+	bar_str += render_widgets(right_widgets)
+	bar.stdin.write((bar_str + '\n').encode())
+	bar.stdin.flush()
+
+try:
+	render_all()
 	while True:
-		ready, _, _ = select.select([bar.stdout], [], [], 5)
+		ready, _, _ = select.select([bar.stdout], [], [], 1)
 		lock.acquire()
 		if len(ready) > 0:
-			line = bar.stdout.readline().decode()
-			print(line)
-		render()
+			action = bar.stdout.readline().decode()[:-1].split(' ')
+			hooks[action[0]].action(action[1:])
+		render_all()
 		lock.release()	
-render()
-click_thread = Thread(target = poll_clicks, args = [])
-click_thread.start()
+except KeyboardInterrupt:
+	exit()
 
-while True:
-	time.sleep(100000)

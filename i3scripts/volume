@@ -27,8 +27,6 @@ if button != 0:
 		run(['pactl', 'set-sink-volume', volume[0], '+5%'])
 	elif button == 5:
 		run(['pactl', 'set-sink-volume', volume[0], '-5%'])
-	pacmd = Popen(['pacmd', 'list-sinks'], stdout=PIPE)
-	pacmd = pacmd.communicate()[0].decode()[sink_start:]
 	volume = sink_volume()
 
 if volume[2]:
