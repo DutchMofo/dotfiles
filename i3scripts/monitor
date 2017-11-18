@@ -23,9 +23,9 @@ for output in outputs:
 if choice != '':
 	cmd.extend(['--output', choice, '--auto', '--primary'])
 	if re.match('LVDS', choice):
-		cmd.extend(['--dpi', '96'])
+		cmd.extend(['--dpi', '90'])
 	elif re.match('HDMI', choice):
-		cmd.extend(['--dpi', '100', \
+		cmd.extend(['--dpi', '96', \
 			'--set', 'Broadcast RGB', 'Full', \
 			'--set', 'audio', 'on'])
 
