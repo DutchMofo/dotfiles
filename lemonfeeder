@@ -55,14 +55,12 @@ class Widget(object):
 	def set_timer(self, time):
 		self.timer = time
 	def set_dirty(self):
-		print(type(self).__name__ + ' marked dirty, was ')
 		self.dirty = True
 	def render_widget(self, now):
 		if self.timer > 0 and self.next_time <= now:
 			self.dirty = True
 		if not self.dirty:
 			return self.cached, False
-		print('cleaned '+type(self).__name__)
 		self.cached = self.render()
 		self.dirty = False
 		self.next_time = now + self.timer
@@ -81,7 +79,7 @@ class I3Workspaces(Widget):
 	def on_workspace_focus(self, i3, e):
 		#hooks['window'].set_dirty()
 		self.set_dirty()
-		set_bar(render_all())
+		render_all()
 	def render(self):
 		window = i3.get_tree().find_focused().name
 		workspaces = i3.get_workspaces()
@@ -100,8 +98,6 @@ class I3Workspaces(Widget):
 				continue
 			workspace = workspaces[index]
 			text = '\uf111' if workspace.visible else '\uf192'
-			if workspace.visible:
-				print(_id)
 			text = button(f'workspace select {_id}', text)
 			if workspace.urgent:
 				text = fg(colors['urgent'], text)
@@ -109,7 +105,6 @@ class I3Workspaces(Widget):
 			index += 1
 		return ' '.join(parts)
 	def goto(self, nr):
-		print(f'workspace {nr}')
 		i3.command(f'workspace {nr}')
 	def action(self, args):
 		if args[0] == 'select':	
@@ -141,12 +136,11 @@ class I3WindowTitle(Widget):
 	def on_window_focus(self, i3, e):
 		#hooks['workspace'].set_dirty()
 		self.set_dirty()
-		set_bar(render_all())
+		render_all()
 	def render(self):
 		window = i3.get_tree().find_focused().name
 		if len(window) > 47:
 			window = window[:47] + '...'
-		print(window)
 		return window
 
 class Twitch(Widget):
@@ -218,7 +212,7 @@ class Twitch(Widget):
 		self.dont_submit = True
 		self.count = len(live_streams)
 		self.set_dirty()
-		set_bar(render_all())
+		render_all()
 		lock.release()
 
 class Time(Widget):
@@ -266,7 +260,7 @@ class Volume(Widget):
 		elif args[0] == 'mute':
 			run(['pactl', 'set-sink-mute', sink, 'toggle'])
 		self.set_dirty()
-		set_bar(render_all())
+		render_all()
 
 class Battery(Widget):
 	def __init__(self):
@@ -357,35 +351,30 @@ def render_all():
 	left,   u1 = render_widgets(left_widgets, now)
 	center, u2 = render_widgets(center_widgets, now)
 	right,  u3 = render_widgets(right_widgets, now)
-	lock.release()
 	if u1 or u2 or u3:
 		left = button('workspace prev', left, 4)
 		left = button('workspace next', left, 5)
 		center = button('workspace prev', center, 4)
 		center = button('workspace next', center, 5)
-		return '  '+left+'%{c}'+center+'%{r}'+right
-	return None
-
-def set_bar(bar_str):
-	bar.stdin.write((bar_str + '\n').encode())
-	bar.stdin.flush()
+		bar_str = '  '+left+'%{c}'+center+'%{r}'+right
+		bar.stdin.write((bar_str + '\n').encode())
+		bar.stdin.flush()
+	lock.release()
 
 i3.event_socket_setup()
-set_bar(render_all())
+render_all()
 try:
 	while True:
 		ready, _, _ = select.select([bar.stdout, i3.sub_socket], [], [], 1)
-		new_bar = None
 		lock.acquire()
 		for pipe in ready:
 			if pipe == bar.stdout:
 				action = bar.stdout.readline().decode()[:-1].split(' ')
 				hooks[action[0]].action(action[1:])
 				new_bar = render_all()
+				time.sleep(0.01)
 			elif pipe == i3.sub_socket:
 				i3.event_socket_poll()
-		if new_bar != None:
-			set_bar(new_bar)
 		lock.release()	
 except KeyboardInterrupt:
 	exit()
