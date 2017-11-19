@@ -32,20 +32,30 @@ theme = {
 	'foreground': colors['text'],
 	'background': colors['normal'],
 	'selected': mix(colors['normal'], colors['active'], 0.5),
-	'purple': '#8e44ad',
+	'twitch': mix(colors['normal'], '#8e44ad', 0.9),
+	'datetime': mix(colors['normal'], '#3498db', 0.3),
+	'volume': mix(colors['normal'], '#e74c3c', 0.4),
+	'power': mix(colors['normal'], '#1abc9c', 0.5),
 }
 
 def button(action, content, btn=1):
 	return '%{A'+str(btn)+':'+action+':}'+content+'%{A}'
-def underline(text):
-	return f'%{{+u}}{text}%{{-u}}';
-def bg(color, text):
-	normal = theme['background']
-	return f'%{{B{color}}}{text}%{{B{normal}}}'
 def fg(color, text):
 	normal = theme['foreground']
 	return f'%{{F{color}}}{text}%{{F{normal}}}'
 
+class Background(object):
+	color = None
+	normal = None
+	widget = None
+	def __init__(self, widget, color):
+		self.normal = theme['background']
+		self.widget = widget
+		self.color = color
+	def render_widget(self, now):
+		text, u = self.widget.render_widget(now)
+		return '%{B'+self.color+'}'+text, u
+		
 class Widget(object):
 	next_time = 0
 	cached = ''
@@ -73,11 +83,10 @@ class Widget(object):
 class I3Workspaces(Widget):
 	def __init__(self):
 		super(I3Workspaces, self).__init__()
-		self.timer = 5
+		self.set_timer(5)
 		i3.on('workspace::focus', self.on_workspace_focus)
 		hooks['workspace'] = self
 	def on_workspace_focus(self, i3, e):
-		#hooks['window'].set_dirty()
 		self.set_dirty()
 		render_all()
 	def render(self):
@@ -134,7 +143,6 @@ class I3WindowTitle(Widget):
 		hooks['window'] = self
 		i3.on('window::focus', self.on_window_focus)
 	def on_window_focus(self, i3, e):
-		#hooks['workspace'].set_dirty()
 		self.set_dirty()
 		render_all()
 	def render(self):
@@ -161,9 +169,7 @@ class Twitch(Widget):
 			pool.submit(self.load_streams)
 		else:
 			self.dont_submit = False
-		twitch = f'  \uf1e8 {self.count}  '
-		twitch = button('twitch', twitch)
-		return bg(theme['purple'], twitch)
+		return button('twitch', f'  \uf1e8 {self.count}  ')
 	def action(self, args):
 		pool.submit(self.load_streams)
 	def load_streams(self):
@@ -220,9 +226,7 @@ class Time(Widget):
 		super(Time, self).__init__()
 		self.set_timer(10)
 	def render(self):
-		time = datetime.datetime.now().strftime('  %Y-%m-%d | %H:%M  ') 
-		color = mix(theme['background'], '#3498db', 0.3);
-		return bg(color, time)
+		return datetime.datetime.now().strftime('  %Y-%m-%d | %H:%M  ')
 
 class Volume(Widget):
 	def __init__(self):
@@ -297,8 +301,7 @@ class Battery(Widget):
 			text += ' \uf1e6  ';
 		elif status == 'Discharging':
 			text += ' ('+match.group(4)+')  '
-		color = mix(theme['background'], '#1abc9c', 0.5)
-		return bg(color, text)
+		return text
 
 hooks = { }
 lock = RLock()
@@ -312,10 +315,10 @@ center_widgets = [
 	I3WindowTitle(),
 ]
 right_widgets = [
-	Twitch(),
-	Time(),
-	Volume(),
-	Battery(),
+	Background(Twitch(), theme['twitch']),
+	Background(Time(), theme['datetime']),
+	Background(Volume(), theme['volume']),
+	Background(Battery(), theme['power']),
 ]
 
 xrandr = Popen(['xrandr'], stdout=PIPE)
@@ -356,7 +359,7 @@ def render_all():
 		left = button('workspace next', left, 5)
 		center = button('workspace prev', center, 4)
 		center = button('workspace next', center, 5)
-		bar_str = '  '+left+'%{c}'+center+'%{r}'+right
+		bar_str = '  '+left+'%{c}'+center+'%{r}'+right+'%{B'+theme['background']+'}'
 		bar.stdin.write((bar_str + '\n').encode())
 		bar.stdin.flush()
 	lock.release()
