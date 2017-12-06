@@ -157,7 +157,7 @@ client.focused_inactive	#fabd2f		#fabd2f		#edbdd2		#d79921
 client.urgent			#fabd2f		#cc241d		#ffffff		#d79921
 
 bar {
-	i3bar_command ~/.config/lemonfeeder
+	i3bar_command ~/.config/lemonfeeder >> lemonbar.log
 #	status_command i3blocks -c ~/.config/i3/i3blocks
 #	separator_symbol " "
 

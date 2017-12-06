@@ -33,16 +33,18 @@ for stream in streams:
 # Cut final newline
 options = options[:-1]
 
-rofi = Popen(['rofi', '-dmenu', '-p', ' ', '-i'], \
+rofi = Popen(['rofi', '-dmenu', '-p', ' ', '-i', '-me-select-entry', '', '-me-accept-entry', 'Mouse1'], \
 	stdin=PIPE, stdout=PIPE)
 choice = rofi.communicate(options.encode())[0].decode()
 
-m = re.match('^ *[\d,\.]+ (\w+) +\[.+\]$', choice)
+m = re.match('^ *[\d,\.]+ (\w+) +\[.+\]|(\w+)$', choice)
+null = open('/dev/null', 'w')
 if m:
-	Popen(['mpv', 'https://twitch.tv/' + m.group(1)])
+	Popen(['mpv', 'https://twitch.tv/' + (m.group(1) or m.group(2))], stdout=null)
 elif re.match('^(https:\/\/)?(www\.)?youtu(\.be|be\.com)', choice):
 	quality = 'bestvideo[height<=1080][fps>=50]+bestaudio/bestvideo[height<=1440]+bestaudio'
-	Popen(['mpv', '--ytdl-format', quality, choice])
+	Popen(['mpv', '--ytdl-format', quality, choice], stdout=null)
 else:
-	Popen(['mpv', choice])
+	Popen(['mpv', choice], stdout=null)
+null.close()
 

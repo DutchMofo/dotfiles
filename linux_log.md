@@ -43,3 +43,11 @@ Section "InputDevice"
 EndSection
 ```
 
+# Wifi improvements
+Added ath9k settings file, disabled hardware encryption because it
+bottlenecks and enable bluetootch coexist
+File: `/etc/modprobe.d/ath9k.conf`
+
+```
+options ath9k nohwcrypt=1 btcoex_enable=1 
+```
