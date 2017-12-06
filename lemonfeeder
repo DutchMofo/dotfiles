@@ -33,9 +33,10 @@ theme = {
 	'background': colors['normal'],
 	'selected': mix(colors['normal'], colors['active'], 0.5),
 	'twitch': mix(colors['normal'], '#8e44ad', 0.9),
-	'datetime': mix(colors['normal'], '#3498db', 0.3),
-	'volume': mix(colors['normal'], '#e74c3c', 0.4),
-	'power': mix(colors['normal'], '#1abc9c', 0.5),
+	'datetime': mix(colors['normal'], '#e74c3c', 0.45),
+	'volume': mix(colors['normal'], '#1abc9c', 0.5),
+	'power': mix(colors['normal'], '#3498db', 0.3),
+	'internet': mix(colors['normal'], '#FDD835', 0.7),
 }
 
 def button(action, content, btn=1):
@@ -45,21 +46,19 @@ def fg(color, text):
 	return f'%{{F{color}}}{text}%{{F{normal}}}'
 
 class Background(object):
-	color = None
-	normal = None
-	widget = None
+	__slots__ = 'color', 'normal', 'widget'
 	def __init__(self, widget, color):
 		self.normal = theme['background']
 		self.widget = widget
 		self.color = color
 	def render_widget(self, now):
 		text, u = self.widget.render_widget(now)
-		return '%{B'+self.color+'}'+text, u
+		return '%{B'+self.color+'}  '+text+'  ', u
 		
 class Widget(object):
-	next_time = 0
-	cached = ''
+	__slots__ = 'next_time', 'cached', 'dirty', 'timer'
 	def __init__(self):
+		self.next_time = 0
 		self.dirty = True
 		self.timer = 0
 	def set_timer(self, time):
@@ -81,8 +80,9 @@ class Widget(object):
 		pass
 
 class I3Workspaces(Widget):
+	__slots__ = ()
 	def __init__(self):
-		super(I3Workspaces, self).__init__()
+		super().__init__()
 		self.set_timer(5)
 		i3.on('workspace::focus', self.on_workspace_focus)
 		hooks['workspace'] = self
@@ -137,8 +137,9 @@ class I3Workspaces(Widget):
 				self.goto(workspaces[index].num)
 
 class I3WindowTitle(Widget):
+	__slots__ = ()
 	def __init__(self):
-		super(I3WindowTitle, self).__init__()
+		super().__init__()
 		self.set_timer(5)
 		hooks['window'] = self
 		i3.on('window::focus', self.on_window_focus)
@@ -147,21 +148,22 @@ class I3WindowTitle(Widget):
 		render_all()
 	def render(self):
 		window = i3.get_tree().find_focused().name
+		if window is None: return self.cached
 		if len(window) > 47:
 			window = window[:47] + '...'
 		return window
 
 class Twitch(Widget):
-	secrets = ''
-	json_cache = '/tmp/twitch.json'
-	dont_submit = False
-	count = 0
-
+	__slots__ = 'secrets', 'json_cache', 'dont_submit', 'count', 'config_dir'
 	def __init__(self):
-		super(Twitch, self).__init__()
-		self.set_timer(5 * 60)
+		super().__init__()
+		self.json_cache = '/tmp/twitch.json'
+		self.dont_submit = False
+		self.config_dir = os.path.expanduser('~') + '/.config'
+		self.count = 0
+		self.set_timer(60 * 3)
 		hooks['twitch'] = self
-		path = os.path.expanduser('~')+'/.config/secrets.json'
+		path = self.config_dir+'/secrets.json'
 		with open(path, 'r') as _file:
 			self.secrets = json_decode(_file.read())
 	def render(self):
@@ -169,9 +171,15 @@ class Twitch(Widget):
 			pool.submit(self.load_streams)
 		else:
 			self.dont_submit = False
-		return button('twitch', f'  \uf1e8 {self.count}  ')
+		twitch = button('twitch reload', f'\uf1e8 {self.count}', 3)
+		twitch = button('twitch show', twitch)
+		return twitch
 	def action(self, args):
-		pool.submit(self.load_streams)
+		if   args[0] == 'reload':
+			pool.submit(self.load_streams)
+		elif args[0] == 'show':
+			Popen([self.config_dir+'/i3scripts/play'], start_new_session=True)
+
 	def load_streams(self):
 		json_cache = self.json_cache
 		secrets = self.secrets
@@ -222,27 +230,29 @@ class Twitch(Widget):
 		lock.release()
 
 class Time(Widget):
+	__slots__ = ()
 	def __init__(self):
-		super(Time, self).__init__()
+		super().__init__()
 		self.set_timer(10)
 	def render(self):
-		return datetime.datetime.now().strftime('  %Y-%m-%d | %H:%M  ')
+		return datetime.datetime.now().strftime('%Y-%m-%d | %H:%M')
 
 class Volume(Widget):
+	__slots__ = ()
 	def __init__(self):
-		super(Volume, self).__init__()
+		super().__init__()
 		hooks['volume'] = self
-	def sink_match(self):
-		pacmd = Popen(['pacmd', 'list-sinks'], stdout=PIPE)
-		pacmd = pacmd.communicate()[0].decode()
-		return re.search('\* index: (\d+)', pacmd)		
-	def render(self):
-		match = self.sink_match()
-		end  = match.string.index('properties:', match.start())
+	def volume_info(self):
+		info = Popen(['pacmd', 'list-sinks'], stdout=PIPE)
+		info = info.communicate()[0].decode()
+		match = re.search('\* index: (\d+)', info)
+		end  = info.index('properties:', match.start())
 		info = match.string[match.start() : end]
 		volume = int(re.search('volume: front-left: \d+ / +(\d+)%', info).group(1))
 		muted  = re.search('muted: (yes|no)', info).group(1) == 'yes'
-
+		return (match.group(1), volume, muted)
+	def render(self):
+		sink, volume, muted = self.volume_info()
 		if muted:
 			icon = '\uf026'
 		elif volume < 35:
@@ -250,36 +260,42 @@ class Volume(Widget):
 		else:
 			icon = '\uf028'
 		volume = str(volume)
-		volume = '  ' + icon + (' ' * (4 - len(volume))) + volume + '%  '
+		volume = icon + (' ' * (4 - len(volume))) + volume + '%'
 		volume = button('volume mute', volume, 3)
 		volume = button('volume up',   volume, 4)
 		volume = button('volume down', volume, 5)
 		return volume
 	def action(self, args):
-		sink = self.sink_match().group(1)
-		if args[0] == 'up':
-			run(['pactl', 'set-sink-volume', sink, '+5%'])
-		elif args[0] == 'down':
-			run(['pactl', 'set-sink-volume', sink, '-5%'])
-		elif args[0] == 'mute':
+		action = args[0]
+		sink, volume, muted = self.volume_info()
+		if action == 'mute':
 			run(['pactl', 'set-sink-mute', sink, 'toggle'])
+		else:
+			volume = (volume+5 if action=='up' else volume-5)
+			volume = int(round(volume/5.0)) * 5
+			volume = max(0, min(150, volume))
+			run(['pactl', 'set-sink-volume', sink, str(volume)+'%'])
 		self.set_dirty()
 		render_all()
 
 class Battery(Widget):
+	__slots__ = ()
 	def __init__(self):
-		super(Battery, self).__init__()
+		super().__init__()
 		self.set_timer(15)
 	def render(self):
 		acpi = Popen(['acpi', '-b'], stdout=PIPE)
-		match = re.match('^Battery (\d+): (\w+), (\d+)%(?:, (\d{2}:\d{2}:\d{2}))?', \
+		match = re.match('^Battery (\d+): (\w+), (\d+)%(?:, (\d{2}:\d{2}):\d{2})?', \
 			acpi.communicate()[0].decode())
 		if match is None:
 			return ''
 
 		status  = match.group(2)
 		percent = int(match.group(3))
-		if   percent < 25:
+		if status == 'Charging' or status == 'Full':
+			color = theme['foreground']
+			icon  = '\uf0e7'
+		elif percent < 25:
 			color = '#FF0000'
 			icon  = '\uf243'
 		elif percent < 50:
@@ -293,20 +309,47 @@ class Battery(Widget):
 			icon  = '\uf240'
 
 		percent = str(percent)
-		text = '  ' + fg(color, icon) \
+		text = fg(color, icon) \
 			+ (' ' * (4 - len(percent))) \
 			+ percent + '%'
 
-		if status == 'Charging' or status == 'Full':
-			text += ' \uf1e6  ';
-		elif status == 'Discharging':
-			text += ' ('+match.group(4)+')  '
+		if status == 'Discharging':
+			text += ' ('+match.group(4)+')'
 		return text
+
+class Internet(Widget):
+	__slots__ = ('interface')
+	def __init__(self):
+		super().__init__()
+		self.set_timer(15)
+	def render(self):
+		route = Popen(['ip', 'route'], stdout=PIPE)
+		route = route.communicate()[0].decode()
+		match = re.match(
+			'default via (\d+\.\d+\.\d+\.\d+) dev (\w+)',
+			route)
+		if match is None:
+			return ''
+		dev = match.group(2)
+		ip  = match.group(1)
+		try:
+			if os.path.exists(f'/sys/class/net/{dev}/wireless'):
+				with(open("/proc/net/wireless", 'r')) as signal_info:
+					match = re.search(
+						f'{dev}: \d+ +(\d+)',
+						signal_info.read())
+					signal = float(match.group(1))
+					signal = int(signal * 100. / 70. + .5)
+					return f'\uF1EB {signal}%'
+			else:
+				return ip
+		except IOError:
+			return ip
 
 hooks = { }
 lock = RLock()
 i3 = i3ipc.Connection()
-pool = ThreadPoolExecutor(max_workers=4)
+pool = ThreadPoolExecutor(max_workers=1)
 
 left_widgets = [
 	I3Workspaces(),
@@ -316,20 +359,16 @@ center_widgets = [
 ]
 right_widgets = [
 	Background(Twitch(), theme['twitch']),
-	Background(Time(), theme['datetime']),
 	Background(Volume(), theme['volume']),
 	Background(Battery(), theme['power']),
+	Background(Internet(), theme['internet']),
+	Background(Time(), theme['datetime']),
 ]
-
-xrandr = Popen(['xrandr'], stdout=PIPE)
-xrandr = xrandr.communicate()[0].decode()
-xrandr = re.search('(\d+)x\d+i? +\d+.\d+\*', xrandr)
 
 bar_args = [
 	'lemonbar',
 	'-u', '2',  # Underline thickness
 	'-a', '20', # Max clickable areas
-	'-g', xrandr.group(1) + 'x30+0+0',
 	'-B', theme['background'],
 	'-F', theme['foreground'],
 	'-U', theme['selected'],
@@ -338,7 +377,6 @@ bar_args = [
 	'-f', 'FontAwesome-11',
 ]
 
-bar = Popen(bar_args, stdin=PIPE, stdout=PIPE)
 def render_widgets(widgets, now):
 	updated = False
 	parts = []
@@ -355,30 +393,45 @@ def render_all():
 	center, u2 = render_widgets(center_widgets, now)
 	right,  u3 = render_widgets(right_widgets, now)
 	if u1 or u2 or u3:
-		left = button('workspace prev', left, 4)
+		left = button('workspace prev', '  '+left, 4)
 		left = button('workspace next', left, 5)
 		center = button('workspace prev', center, 4)
 		center = button('workspace next', center, 5)
-		bar_str = '  '+left+'%{c}'+center+'%{r}'+right+'%{B'+theme['background']+'}'
+		bar_str = left+'%{c}'+center+'%{r}'+right+'%{B'+theme['background']+'}'
 		bar.stdin.write((bar_str + '\n').encode())
 		bar.stdin.flush()
 	lock.release()
 
+bar = None
+def remake_bar(i3, e):
+	global bar
+	if bar is not None:
+		bar.stdin.close()
+		bar.wait()
+	xrandr = Popen(['xrandr'], stdout=PIPE)
+	xrandr = xrandr.communicate()[0].decode()
+	xrandr = re.search('(\d+)x\d+i? +\d+.\d+\*', xrandr)
+	bar = Popen(bar_args + ['-g', xrandr.group(1) + 'x30+0+0'], stdin=PIPE, stdout=PIPE)
+
+print('started')
+remake_bar(i3, None)
+i3.on('output', remake_bar)
 i3.event_socket_setup()
 render_all()
 try:
 	while True:
 		ready, _, _ = select.select([bar.stdout, i3.sub_socket], [], [], 1)
-		lock.acquire()
 		for pipe in ready:
 			if pipe == bar.stdout:
 				action = bar.stdout.readline().decode()[:-1].split(' ')
 				hooks[action[0]].action(action[1:])
-				new_bar = render_all()
-				time.sleep(0.01)
+				time.sleep(0.03)
 			elif pipe == i3.sub_socket:
 				i3.event_socket_poll()
-		lock.release()	
+		render_all()
 except KeyboardInterrupt:
-	exit()
+	pass
+
+pool.shutdown()
+
 
